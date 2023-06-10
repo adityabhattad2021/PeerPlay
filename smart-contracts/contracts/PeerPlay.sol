@@ -4,15 +4,12 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-
 /**
  * @title PeerPlay
  * @dev PeerPlay is a decentralized video sharing platform
  * @author Aditya Bhattad
  */
 contract PeerPlay is ERC1155, Ownable {
-
-
     /**
      * @notice Creator struct
      * @param supporters Number of supporters
@@ -24,7 +21,6 @@ contract PeerPlay is ERC1155, Ownable {
         uint256 supportPrice;
         address[] supportersList;
     }
-
 
     /**
      * @notice Video struct
@@ -64,13 +60,12 @@ contract PeerPlay is ERC1155, Ownable {
     /**
      * @notice Mapping of creator address to revenue share
      */
-    mapping(address=> uint256) private creatorRevenueShare;
+    mapping(address => uint256) private creatorRevenueShare;
 
     /**
      * @notice Total number of videos
      */
     uint private videoCount;
-
 
     /**
      * @notice Event emitted when a creator is supported
@@ -118,19 +113,13 @@ contract PeerPlay is ERC1155, Ownable {
      * @param videoId Video ID
      * @param amount Amount of ETH distributed
      */
-    event RevenueDistributed(
-        uint256 indexed videoId,
-        uint256 amount
-    );
+    event RevenueDistributed(uint256 indexed videoId, uint256 amount);
 
     /**
      * @param withdrawer Address of the withdrawer
      * @param amount Amount of ETH withdrawn
      */
-    event RevenueWithdrawn(
-        address indexed withdrawer,
-        uint256 amount
-    );
+    event RevenueWithdrawn(address indexed withdrawer, uint256 amount);
 
     constructor() ERC1155("") {}
 
@@ -176,7 +165,10 @@ contract PeerPlay is ERC1155, Ownable {
             bytes(thumbnailHash).length > 0,
             "Thumbnail hash cannot be empty"
         );
-        require(videoPrice >= 0, "Video price must be greater than 0 or equal to 0");
+        require(
+            videoPrice >= 0,
+            "Video price must be greater than 0 or equal to 0"
+        );
         // Increment video count
         videoCount += 1;
         uint256 videoId = videoCount;
@@ -203,7 +195,6 @@ contract PeerPlay is ERC1155, Ownable {
         );
     }
 
-
     /**
      * @param videoId ID of the video
      * @dev Mints an access NFT for the video
@@ -222,7 +213,7 @@ contract PeerPlay is ERC1155, Ownable {
         );
         _mint(msg.sender, videoId, 1, "");
         // Distribute the revenue among the creator and supporters
-        distributeRevenue(creator, msg.value,videoId);
+        distributeRevenue(creator, msg.value, videoId);
 
         emit AccessNFTMinted(creator, videoId, msg.sender);
     }
@@ -252,13 +243,18 @@ contract PeerPlay is ERC1155, Ownable {
      * @param amount Amount of ETH to distribute
      * @dev Distributes the revenue among the creator and supporters
      */
-    function distributeRevenue(address creator, uint256 amount,uint256 videoId) internal {
+    function distributeRevenue(
+        address creator,
+        uint256 amount,
+        uint256 videoId
+    ) internal {
         uint256 creatorShare = (amount * 80) / 100;
         uint256 supporterShare = (amount * 19) / 100;
-    
+
         creatorRevenueShare[creator] += creatorShare;
 
-        uint256 sharePerSupporter = supporterShare / creators[creator].supporters;
+        uint256 sharePerSupporter = supporterShare /
+            creators[creator].supporters;
         for (uint256 i = 0; i < creators[creator].supportersList.length; i++) {
             address supporter = creators[creator].supportersList[i];
             supporterRevenueShare[supporter] += sharePerSupporter;
@@ -301,12 +297,13 @@ contract PeerPlay is ERC1155, Ownable {
      * @dev Withdraws the contract balance (Platform revenue)
      */
     function withdraw() public onlyOwner {
-        (bool success, ) = payable(owner()).call{value: address(this).balance}("");
+        (bool success, ) = payable(owner()).call{value: address(this).balance}(
+            ""
+        );
         require(success, "Withdrawal failed");
 
         emit RevenueWithdrawn(owner(), address(this).balance);
     }
-
 
     //////////////////////////////////////////////////////////////////
     ///////////////// GETTERS ////////////////////////////////////////
@@ -316,7 +313,9 @@ contract PeerPlay is ERC1155, Ownable {
      * @param creator Address of the creator
      * @dev Returns the number of supporters for a creator
      */
-    function getNumberOfSupporters(address creator) public view returns (uint256) {
+    function getNumberOfSupporters(
+        address creator
+    ) public view returns (uint256) {
         return creators[creator].supporters;
     }
 
@@ -332,7 +331,9 @@ contract PeerPlay is ERC1155, Ownable {
      * @param creator Address of the creator
      * @dev Returns the list of supporters for a creator
      */
-    function getSupportersList(address creator) public view returns (address[] memory) {
+    function getSupportersList(
+        address creator
+    ) public view returns (address[] memory) {
         return creators[creator].supportersList;
     }
 
@@ -340,7 +341,9 @@ contract PeerPlay is ERC1155, Ownable {
      * @param creator Address of the creator
      * @dev Returns the list of videos for a creator
      */
-    function getVideosList(address creator) public view returns (Video[] memory) {
+    function getVideosList(
+        address creator
+    ) public view returns (Video[] memory) {
         Video[] memory videosList = new Video[](videoCount);
         uint256 counter = 0;
         for (uint256 i = 1; i <= videoCount; i++) {
@@ -356,7 +359,13 @@ contract PeerPlay is ERC1155, Ownable {
      * @param videoId ID of the video
      * @dev Returns the video details
      */
-    function getVideoDetails(uint256 videoId) public view returns (Video memory) {
+    function getVideoDetails(
+        uint256 videoId
+    ) public view returns (Video memory) {
+        require(
+            balanceOf(msg.sender, videoId) >= 1,
+            "You do not have access to this video"
+        );
         return videos[videoId];
     }
 
@@ -372,7 +381,9 @@ contract PeerPlay is ERC1155, Ownable {
      * @param videoId ID of the video
      * @dev Returns the video title
      */
-    function getVideoTitle(uint256 videoId) public view returns (string memory) {
+    function getVideoTitle(
+        uint256 videoId
+    ) public view returns (string memory) {
         return videos[videoId].title;
     }
 
@@ -391,10 +402,9 @@ contract PeerPlay is ERC1155, Ownable {
         return videos[videoId].creator;
     }
 
-
     /**
      * @dev Returns the list of all videos
-     */ 
+     */
     function getAllVideos() public view returns (Video[] memory) {
         Video[] memory videosList = new Video[](videoCount);
         for (uint256 i = 1; i <= videoCount; i++) {
@@ -416,5 +426,19 @@ contract PeerPlay is ERC1155, Ownable {
     function checkCreatorRevenue() public view returns (uint256) {
         return creatorRevenueShare[msg.sender];
     }
-    
+
+    /**
+     * @dev Returns the list vidoes minted by the user
+     */
+    function getUserMintedVideos() public view returns(Video[] memory){
+        Video[] memory videoList = new Video[](videoCount);
+        uint256 counter=0;
+        for(uint i = 1;i<=videoCount;i++){
+            if(balanceOf(msg.sender, i)>=1){
+                videoList[counter]=videos[i];
+                counter++;
+            }
+        }
+        return videoList;
+    }
 }

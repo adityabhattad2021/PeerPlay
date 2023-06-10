@@ -65,6 +65,84 @@ a {
   transition: all 0.3s ease;
 }
 
+.submit-btn{
+  font-weight: bold !important;
+  text-transform: capitalize;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor:pointer;
+  background: #289935;
+  outline: none;
+  border: none;
+  font-size: larger;
+  padding: 20px 15px;
+  height: 50px;
+  width: 45%;
+  padding: 7px 15px;
+  border-radius: 10px;
+  color: #fff;
+}
+
+.form-box{
+  padding: 30px;
+  width: calc(100%);
+  height: 85%;
+  gap: 40px;
+  display: flex;
+}
+
+.dropzone-thumbnail{
+  width: 60%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 2px dashed #000;
+  background-color: #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.upload-thumbnail{
+  width: 60%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 2px dashed #000;
+  background-color: #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.dropzone-video{
+  width: 100%;
+  height: 400px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 2px dashed #000;
+  background-color: #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.upload-video{
+  width: 100%;
+  height: 400px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 2px dashed #000;
+  background-color: #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 @media screen and (max-width: 900px) {
   .category-btn{
     margin: 10px;

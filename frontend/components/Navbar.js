@@ -30,17 +30,17 @@ export default function Navbar() {
     })
   const { disconnect } = useDisconnect();
 
-  console.log("address", address);
-  console.log("connector", connector);
-  console.log("isConnected", isConnected);
-  console.log("ensAvatar", ensAvatar);
-  console.log("ensName", ensName);
-  console.log("connect", connect);
-  console.log("connectors", connectors);
-  console.log("error", error);
-  console.log("isLoading", isLoading);
-  console.log("pendingConnector", pendingConnector);
-  console.log("disconnect", disconnect);
+  // console.log("address", address);
+  // console.log("connector", connector);
+  // console.log("isConnected", isConnected);
+  // console.log("ensAvatar", ensAvatar);
+  // console.log("ensName", ensName);
+  // console.log("connect", connect);
+  // console.log("connectors", connectors);
+  // console.log("error", error);
+  // console.log("isLoading", isLoading);
+  // console.log("pendingConnector", pendingConnector);
+  // console.log("disconnect", disconnect);
   return (
     <Stack
       direction={notSmallScreen ? "row" : "column"}
