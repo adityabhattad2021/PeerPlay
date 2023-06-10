@@ -12,8 +12,10 @@ import {
   useEnsAvatar,
   useEnsName,
 } from "wagmi";
+import { useStateContext } from "@/context";
 
 export default function Navbar() {
+  const { working } = useStateContext();
   const { address, connector, isConnected } = useAccount();
   const { data: ensAvatar } = useEnsAvatar({ address });
   const { data: ensName } = useEnsName({ address });
