@@ -4,12 +4,13 @@ import "./globals.css";
 import { Inter } from "next/font/google";
 import "@rainbow-me/rainbowkit/styles.css";
 
-import { getDefaultWallets, RainbowKitProvider } from "@rainbow-me/rainbowkit";
+import { getDefaultWallets, RainbowKitProvider,darkTheme } from "@rainbow-me/rainbowkit";
 import { configureChains, createConfig, WagmiConfig } from "wagmi";
 import { polygonMumbai, polygon } from "wagmi/chains";
 import { alchemyProvider } from "wagmi/providers/alchemy";
 import { publicProvider } from "wagmi/providers/public";
 import { useState, useEffect } from "react";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { StateContextProvider } from "@/context";
 
 const { chains, publicClient } = configureChains(
@@ -19,6 +20,14 @@ const { chains, publicClient } = configureChains(
     publicProvider(),
   ]
 );
+
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: "#289935",
+    },
+  },
+});
 
 const { connectors } = getDefaultWallets({
   appName: "PeerPlay",
@@ -44,15 +53,26 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className={inter.className}>
         <WagmiConfig config={wagmiConfig}>
-          <RainbowKitProvider chains={chains}>
-            <StateContextProvider>
-              {mounted && (
-                <>
-                  <Navbar />
-                  {children}
-                </>
-              )}
-            </StateContextProvider>
+          <RainbowKitProvider
+            chains={chains}
+            theme={darkTheme({
+              accentColor:'#289935',
+              accentColorForeground:'white',
+              borderRadius:'large',
+              fontStack:'system',
+              overlayBlur:'small',
+            })}
+          >
+            <ThemeProvider theme={theme}>
+              <StateContextProvider>
+                {mounted && (
+                  <>
+                    <Navbar />
+                    {children}
+                  </>
+                )}
+              </StateContextProvider>
+            </ThemeProvider>
           </RainbowKitProvider>
         </WagmiConfig>
       </body>
