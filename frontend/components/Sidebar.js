@@ -23,7 +23,7 @@ export default function Sidebar({ selectedPage, setSelectedPage }) {
   const pathname = usePathname();
   return (
     <Stack
-      direction="row"
+      direction="row"    
       sx={{
         overflowY: "auto",
         height: { sx: "auto", md: "90%" },

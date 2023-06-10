@@ -18,10 +18,16 @@ export default function Navbar() {
   const notSmallScreen = useMediaQuery("(min-width:870px)");
   const { working } = useStateContext();
   const { address, connector, isConnected } = useAccount();
-  const { data: ensAvatar } = useEnsAvatar({ address });
-  const { data: ensName } = useEnsName({ address });
   const { connect, connectors, error, isLoading, pendingConnector } =
     useConnect();
+    const ensName = useEnsName({
+      address: '0xa5cc3c03994db5b0d9a5eedd10cabab0813678ac',
+      chainId:1,
+    })
+    const ensAvatar = useEnsAvatar({
+      name:ensName.data,
+      chainId:1,
+    })
   const { disconnect } = useDisconnect();
 
   console.log("address", address);

@@ -23,11 +23,14 @@ export default function Feed({children}) {
   const {isConnected} = useAccount();
 
   return (
-    <Stack sx={{ flexDirection: { sx: "column", md: "row" } }}>
+    <Stack sx={{ flexDirection: { sx: "column", md: "row" },overflow:"auto" }}>
       <Box
         sx={{
-          height: { sx: "auto", md: "89vh" },
-          width: { sx: "100%", md: "12%" },
+          position: "fixed",
+          left:0,
+          top:80,
+          height: { xs: "auto", md: "89vh" },
+          width: { xs: "100%", md: "12%" },
           borderRight: "1px solid #3d3d3d",
           px: { sx: 0, md: 2 },
         }}

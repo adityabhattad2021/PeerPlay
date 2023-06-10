@@ -4,10 +4,15 @@ import "./globals.css";
 import { Inter } from "next/font/google";
 import "@rainbow-me/rainbowkit/styles.css";
 
-import { getDefaultWallets, RainbowKitProvider,darkTheme } from "@rainbow-me/rainbowkit";
+import {
+  getDefaultWallets,
+  RainbowKitProvider,
+  darkTheme,
+} from "@rainbow-me/rainbowkit";
 import { configureChains, createConfig, WagmiConfig } from "wagmi";
-import { polygonMumbai, polygon } from "wagmi/chains";
+import { mainnet, polygonMumbai, polygon } from "wagmi/chains";
 import { alchemyProvider } from "wagmi/providers/alchemy";
+import {jsonRpcProvider} from "wagmi/providers/jsonRpc";
 import { publicProvider } from "wagmi/providers/public";
 import { useState, useEffect } from "react";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
@@ -16,9 +21,19 @@ import { StateContextProvider } from "@/context";
 import Feed from "@/components/Feed";
 
 const { chains, publicClient } = configureChains(
-  [polygonMumbai, polygon],
+  [mainnet, polygonMumbai],
   [
-    alchemyProvider({ apiKey: process.env.NEXT_PUBLIC_POLYGON_RPC_URL }),
+    jsonRpcProvider({
+      rpc:(chain)=>{
+        const rpcLookup = {
+          [polygonMumbai.id]:process.env.NEXT_PUBLIC_POLYGON_RPC_URL,
+          [mainnet.id]:process.env.NEXT_PUBLIC_MAINNET_RPC_URL,
+        }
+        return {
+          http: rpcLookup[chain.id],
+        }
+      }
+    }),
     publicProvider(),
   ]
 );
@@ -58,17 +73,17 @@ export default function RootLayout({ children }) {
           <RainbowKitProvider
             chains={chains}
             theme={darkTheme({
-              accentColor:'#289935',
-              accentColorForeground:'white',
-              borderRadius:'large',
-              fontStack:'system',
-              overlayBlur:'small',
+              accentColor: "#289935",
+              accentColorForeground: "white",
+              borderRadius: "large",
+              fontStack: "system",
+              overlayBlur: "small",
             })}
           >
             <ThemeProvider theme={theme}>
               <StateContextProvider>
                 {mounted && (
-                  <Box sx={{ backgroundColor: '#000',height:"100vh" }}>
+                  <Box sx={{ backgroundColor: "#000", height: "100%" }}>
                     <Navbar />
                     <Feed>{children}</Feed>
                   </Box>
