@@ -1,5 +1,5 @@
 "use client";
-import { Stack } from "@mui/material";
+import { Stack, useMediaQuery } from "@mui/material";
 import logo from "../assets/logo.svg";
 import Link from "next/link";
 import Image from "next/image";
@@ -15,6 +15,7 @@ import {
 import { useStateContext } from "@/context";
 
 export default function Navbar() {
+  const notSmallScreen = useMediaQuery("(min-width:870px)");
   const { working } = useStateContext();
   const { address, connector, isConnected } = useAccount();
   const { data: ensAvatar } = useEnsAvatar({ address });
@@ -36,14 +37,15 @@ export default function Navbar() {
   console.log("disconnect", disconnect);
   return (
     <Stack
-      direction="row"
-      alignItems="center"
+      direction={notSmallScreen ? "row" : "column"}
+      alignItems={notSmallScreen ? "center" : "flex-start"}
       p={2}
       sx={{
         position: "sticky",
         background: "#000",
         top: 0,
         justifyContent: "space-between",
+        borderBottom: "1px solid #3d3d3d",
       }}
     >
       <Link href={"/"}>
@@ -63,9 +65,10 @@ export default function Navbar() {
         </div>
       </Link>
       <Stack
-        direction="row"
+        direction={notSmallScreen ? "row" : "column"}
         alignItems="center"
-        sx={{ display: { xs: "none", sm: "flex" } }}
+        justifyContent={notSmallScreen ? "flex-end" : "center"}
+        sx={{ display: { xs: "none", sm: "flex" } ,gap:2}}
       >
         <SearchBar />
         <ConnectButton chainStatus="full" />

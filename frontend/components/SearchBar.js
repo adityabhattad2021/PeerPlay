@@ -19,8 +19,9 @@ export default function SearchBar() {
         type="submit"
         sx={{ p: "10px", color: "red" }}
         aria-label="search"
+        color="primary"
       >
-        <SearchIcon />
+        <SearchIcon color="success" />
       </IconButton>
     </Paper>
   );

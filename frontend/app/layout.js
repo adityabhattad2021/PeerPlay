@@ -11,7 +11,9 @@ import { alchemyProvider } from "wagmi/providers/alchemy";
 import { publicProvider } from "wagmi/providers/public";
 import { useState, useEffect } from "react";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { Box } from "@mui/material";
 import { StateContextProvider } from "@/context";
+import Feed from "@/components/Feed";
 
 const { chains, publicClient } = configureChains(
   [polygonMumbai, polygon],
@@ -66,10 +68,10 @@ export default function RootLayout({ children }) {
             <ThemeProvider theme={theme}>
               <StateContextProvider>
                 {mounted && (
-                  <>
+                  <Box sx={{ backgroundColor: '#000',height:"100vh" }}>
                     <Navbar />
-                    {children}
-                  </>
+                    <Feed>{children}</Feed>
+                  </Box>
                 )}
               </StateContextProvider>
             </ThemeProvider>
