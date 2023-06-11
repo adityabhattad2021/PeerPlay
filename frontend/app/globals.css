@@ -84,7 +84,31 @@ a {
   color: #fff;
 }
 
+
+.contract-btn{
+  font-weight: bold !important;
+  text-transform: capitalize;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor:pointer;
+  background: #289935;
+  outline: none;
+  border: none;
+  font-size: small;
+  padding: 20px 15px;
+  height: 50px;
+  width: 45%;
+  padding: 7px 15px;
+  border-radius: 10px;
+  color: #fff;
+}
+
 .submit-btn:disabled{
+  cursor: not-allowed;
+}
+
+.contract-btn:disabled{
   cursor: not-allowed;
 }
 

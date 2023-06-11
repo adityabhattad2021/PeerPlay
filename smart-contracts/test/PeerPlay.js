@@ -63,6 +63,7 @@ describe("PeerPlay", function () {
       const { peerplay} = await loadFixture(deployPeerPlayFixture);
  
       const supportPrice = await peerplay.calculateSupportPrice(creator.address);
+      console.log(supportPrice);
     
       const tx = await peerplay.connect(supporter).supportCreator(creator.address, { value: supportPrice });
       await tx.wait();

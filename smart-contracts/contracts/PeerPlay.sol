@@ -167,7 +167,7 @@ contract PeerPlay is Ownable{
     /**
      * @param title  title of the video
      * @param description description of the video
-     * @param livepeerHash livepeer hash of the video
+     * @param livepeerId livepeer hash of the video
      * @param thumbnailHash IPFS hash of the thumbnail
      * @param videoPrice Price in ETH to access the video
      * @dev Uploads a video
@@ -175,14 +175,14 @@ contract PeerPlay is Ownable{
     function uploadVideo(
         string memory title,
         string memory description,
-        string memory livepeerHash,
+        string memory livepeerId,
         string memory thumbnailHash,
         uint256 videoPrice
     ) public {
         require(bytes(title).length > 0, "Title cannot be empty");
         require(bytes(description).length > 0, "Description cannot be empty");
         require(
-            bytes(livepeerHash).length > 0,
+            bytes(livepeerId).length > 0,
             "Livepeer hash cannot be empty"
         );
         require(
@@ -201,7 +201,7 @@ contract PeerPlay is Ownable{
             msg.sender,
             title,
             description,
-            livepeerHash,
+            livepeerId,
             thumbnailHash,
             videoPrice
         );
@@ -217,7 +217,7 @@ contract PeerPlay is Ownable{
             videoId,
             title,
             description,
-            livepeerHash,
+            livepeerId,
             thumbnailHash,
             videoPrice
         );

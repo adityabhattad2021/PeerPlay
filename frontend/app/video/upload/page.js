@@ -6,7 +6,7 @@ import {
   InputAdornment,
   Typography,
 } from "@mui/material";
-import { useAccount } from "wagmi";
+import { useAccount, useWaitForTransaction } from "wagmi";
 import { useRouter } from "next/navigation";
 import { useState, useCallback, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
@@ -82,18 +82,39 @@ export default function upload() {
       debouncedPrice.length > 0,
   });
 
-  const { write } = useContractWrite(config);
+  const { data, write } = useContractWrite(config);
+  const { isLoading, isSuccess } = useWaitForTransaction({
+    hash: data?.hash,
+  });
 
   const { uploadToIpfsPromise, uploadVideoPromise } = useStateContext();
 
-
-  function writeToSmartContract(){
-    write();
-    router.push("/")
+  function writeToSmartContractPromise() {
+    return new Promise(async (resolve, reject) => {
+      try {
+        write();
+        resolve();
+      } catch (error) {
+        reject(error);
+      }
+    });
   }
 
-  async function handleSubmit() {
+  function writeToSmartContract() {
+    toast.promise(writeToSmartContractPromise(), {
+      success: ()=>{
+        if(isLoading){
+          return "Writing to Smart Contract..."
+        }else{
+          return "Successfully writter to the smart contract"
+        }
+      },
+      error: "Error writing to the Smart Contract",
+    });
+  }
 
+  async function handleSubmit(e) {
+    e.preventDefault()
     if (!title || !description || !price || !video || !thumbnail) {
       alert("Please fill all the fields!");
       return;
@@ -140,7 +161,7 @@ export default function upload() {
       <Typography variant="h4" fontWeight="bold" mb={2} sx={{ color: "white" }}>
         Upload <span style={{ color: "#289935" }}>video</span>
       </Typography>
-      <div className="form-box">
+      <form className="form-box" onSubmit={(e) => handleSubmit(e)}>
         <Stack direction="column" gap={3} sx={{ width: "45%" }}>
           {!thumbnail ? (
             <div {...getRootPropsThumb()} className="dropzone-thumbnail">
@@ -200,8 +221,8 @@ export default function upload() {
                 ),
               }}
             />
-            <button onClick={()=>handleSubmit()} className="submit-btn">Submit</button>
-            <button disabled={!write} onClick={writeToSmartContract} className="submit-btn">Add to Smart Contract</button>
+            <button type="submit" className="submit-btn">Upload</button>
+            <button type="button" disabled={!write} onClick={writeToSmartContract} className="contract-btn">Save to Smart Contract</button>
           </Stack>
         </Stack>
         <Stack direction="column" gap={6} sx={{ width: "45%" }}>
@@ -236,7 +257,7 @@ export default function upload() {
             </div>
           )}
         </Stack>
-      </div>
+      </form>
     </Box>
   );
 }
