@@ -3,7 +3,7 @@ import { Box, Stack } from "@mui/material";
 import VideoCard from "./VideoCard";
 import Loader from "./Loader";
 
-export default function Videos({videos,isLoading,direction}) {
+export default function Videos({videos,isLoading}) {
 
   if(isLoading){
     return (
@@ -15,7 +15,7 @@ export default function Videos({videos,isLoading,direction}) {
 
   return (
     <Stack
-      direction={direction ? direction : "row"}
+      direction={ "row"}
       flexWrap="wrap"
       justifyContent="start"
       alignItems="start"

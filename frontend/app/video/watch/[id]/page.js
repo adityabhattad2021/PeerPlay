@@ -123,7 +123,7 @@ export default function Watch({ params }) {
           >
             More from <span style={{ color: "#289935" }}>Creator</span>
           </Typography>
-          <Videos videos={[]} direction="column" />
+          <Videos videos={[]} isLoading={true} />
         </Box>
       </Stack>
     </Box>
