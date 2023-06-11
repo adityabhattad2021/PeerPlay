@@ -9,9 +9,13 @@ describe("PeerPlay", function () {
   async function deployPeerPlayFixture() {
     const deployer = await ethers.getSigner();
 
+    const PeerPlayTokenContract = await ethers.getContractFactory("PeerPlayTokens");
+    const peerplayTokenContract = await PeerPlayTokenContract.deploy();
+    console.log(peerplayTokenContract.address);
     const PeerPlay = await ethers.getContractFactory("PeerPlay");
-    const peerplay = await PeerPlay.deploy();
-
+    const peerplay = await PeerPlay.deploy(peerplayTokenContract.address);
+    const transectionResponse = await peerplayTokenContract.setPlatformAddress(peerplay.address);
+    await transectionResponse.wait();
     return { peerplay,deployer };
   }
 

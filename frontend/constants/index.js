@@ -1,0 +1,1 @@
+export const peerplayAddress = "0x660b18Fc85029ca169294e8E4F89C2596f61000B"

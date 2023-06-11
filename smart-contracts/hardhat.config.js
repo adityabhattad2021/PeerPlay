@@ -15,6 +15,12 @@ module.exports = {
   etherscan: {
     apiKey: process.env.POLYSCAN_API_KEY
   },
+  solc: {
+    optimizer: {
+      enabled: true,
+      runs: 200
+    }
+  },
   path:{
     artifacts:'./artifacts',
   },
