@@ -1,6 +1,8 @@
 const hre = require("hardhat");
 const { verify } = require("../utils/verify");
 const fs = require("fs");
+const { getAbi } = require("../utils/getAbi");
+
 
 async function main() {
 
@@ -39,9 +41,11 @@ async function main() {
     console.log("----------------------Verified the Contract Successfully----------------------");
   }
   console.log("------------------Updating Frontend---------------------");
+  const abi =  getAbi("PeerPlay");
   fs.writeFileSync(
     '../frontend/constants/index.js',
-    `export const peerplayAddress = "${peerPlay.address}"`
+    `export const peerplayAddress = "${peerPlay.address}";
+    export const peerplayABI = ${JSON.stringify(abi)}`
     )
     console.log("---------------------------Done-------------------------------");
 
