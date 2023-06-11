@@ -63,6 +63,11 @@ contract PeerPlay is ERC1155, Ownable {
     mapping(address => uint256) private creatorRevenueShare;
 
     /**
+     * @dev Mapping of user address to mapping of creator address to boolean which keeps track if user is supporter of the creator
+     */
+    mapping (address => mapping (address => bool)) private isSupporter;
+
+    /**
      * @notice Total number of videos
      */
     uint private videoCount;
@@ -129,6 +134,7 @@ contract PeerPlay is ERC1155, Ownable {
      */
     function supportCreator(address creator) public payable {
         require(creator != address(0), "Invalid creator address");
+        require(!isSupporter[msg.sender][creator], "Already a supporter");
         require(msg.value > 0, "Amount must be greater than 0");
         uint256 supportPrice = calculateSupportPrice(creator);
         require(
@@ -137,6 +143,7 @@ contract PeerPlay is ERC1155, Ownable {
         );
         creators[creator].supporters += 1;
         creators[creator].supportersList.push(msg.sender);
+        isSupporter[msg.sender][creator] = true;
         emit SupportedCreator(msg.sender, creator, msg.value);
     }
 
@@ -441,4 +448,15 @@ contract PeerPlay is ERC1155, Ownable {
         }
         return videoList;
     }
+
+    /**
+     * @param creator Address of the creator
+     * @dev Returns if the user is a supporter of the creator
+     */
+    function checkIfSupporter(
+        address creator
+    ) public view returns (bool) {
+        return isSupporter[msg.sender][creator];
+    }
+
 }
