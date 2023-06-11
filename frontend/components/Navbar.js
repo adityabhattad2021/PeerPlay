@@ -12,11 +12,9 @@ import {
   useEnsAvatar,
   useEnsName,
 } from "wagmi";
-import { useStateContext } from "@/context";
 
 export default function Navbar() {
   const notSmallScreen = useMediaQuery("(min-width:870px)");
-  const { working } = useStateContext();
   const { address, connector, isConnected } = useAccount();
   const { connect, connectors, error, isLoading, pendingConnector } =
     useConnect();

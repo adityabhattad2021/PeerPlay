@@ -5,22 +5,35 @@ import {
   Stack,
   InputAdornment,
   Typography,
-  CardMedia,
 } from "@mui/material";
 import { useAccount } from "wagmi";
 import { useRouter } from "next/navigation";
-import { useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
-import { useState } from "react";
+import { useStateContext } from "@/context";
+import { toast } from "react-hot-toast";
 import ClearIcon from "@mui/icons-material/Clear";
+import { usePrepareContractWrite, useContractWrite } from "wagmi";
+import { useDebounce } from "usehooks-ts";
+import { peerplayAddress, peerplayABI } from "@/constants";
+import { ethers } from "ethers";
 
 export default function upload() {
   // Form states
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [price, setPrice] = useState("");
+  const [price, setPrice] = useState("0");
   const [video, setVideo] = useState(null);
   const [thumbnail, setThumbnail] = useState(null);
+  const [cid, setCid] = useState("");
+  const [assetId, setAssetId] = useState("");
+
+  // Smart Contract Paramaters
+  const debouncedTitle = useDebounce(title, 10000);
+  const debouncedDesc = useDebounce(description, 10000);
+  const debouncedAssetId = useDebounce(assetId, 10000);
+  const debouncedCid = useDebounce(cid, 10000);
+  const debouncedPrice = useDebounce(price, 10000);
 
   const router = useRouter();
   const { isConnected } = useAccount();
@@ -35,22 +48,74 @@ export default function upload() {
     getRootProps: getRootPropsVid,
     getInputProps: getInputPropsVid,
     isDragActive: isDragActiveVid,
-  } = useDropzone({ onDrop: onDropVideo,accept:"video/mp4" });
+  } = useDropzone({
+    onDrop: onDropVideo,
+    maxFiles: 1,
+  });
 
   const {
     getRootProps: getRootPropsThumb,
     getInputProps: getInputPropsThumb,
     isDragActive: isDragActiveThumb,
-  } = useDropzone({ onDrop: onDropThumbnail, accept: "image/png" });
+  } = useDropzone({
+    onDrop: onDropThumbnail,
+    maxFiles: 1,
+  });
 
-  async function handleSubmit(e) {
-    e.preventDefault();
+  // Smart Contract Call
+  const { config } = usePrepareContractWrite({
+    address: peerplayAddress,
+    abi: peerplayABI,
+    functionName: "uploadVideo",
+    args: [
+      debouncedTitle,
+      debouncedDesc,
+      debouncedAssetId,
+      debouncedCid,
+      ethers.utils.parseEther(debouncedPrice),
+    ],
+    enabled:
+      debouncedTitle.length > 0 &&
+      debouncedDesc.length > 0 &&
+      debouncedAssetId.length > 0 &&
+      debouncedCid.length > 0 &&
+      debouncedPrice.length > 0,
+  });
+
+  const { write } = useContractWrite(config);
+
+  const { uploadToIpfsPromise, uploadVideoPromise } = useStateContext();
+
+
+  function writeToSmartContract(){
+    write();
+    router.push("/")
+  }
+
+  async function handleSubmit() {
+
     if (!title || !description || !price || !video || !thumbnail) {
       alert("Please fill all the fields!");
       return;
     }
-    // TODO: Upload video to Livepeer and thumbnail to IPFS
-    alert("Video uploaded successfully!");
+
+    toast.promise(uploadToIpfsPromise(thumbnail), {
+      loading: "Uploading Thumbnail to IPFS 🖼️",
+      success: (cid) => {
+        setCid(cid);
+        return `Successfully uploaded! CID: ${cid}`;
+      },
+      error: "There was an unexected error while uploading",
+    });
+
+    toast.promise(uploadVideoPromise(video, title), {
+      loading: "Uploading Video to Livepeer 📺",
+      success: (assetId) => {
+        setAssetId(assetId);
+        return `Successfully uploaded! Asset Id: ${assetId}`;
+      },
+      error: "Error uploading the video",
+    });
   }
 
   if (!isConnected) {
@@ -75,7 +140,7 @@ export default function upload() {
       <Typography variant="h4" fontWeight="bold" mb={2} sx={{ color: "white" }}>
         Upload <span style={{ color: "#289935" }}>video</span>
       </Typography>
-      <form className="form-box" onSubmit={(e) => handleSubmit(e)}>
+      <div className="form-box">
         <Stack direction="column" gap={3} sx={{ width: "45%" }}>
           {!thumbnail ? (
             <div {...getRootPropsThumb()} className="dropzone-thumbnail">
@@ -83,14 +148,22 @@ export default function upload() {
               {isDragActiveThumb ? (
                 <p>Drop the thumbnail here ...</p>
               ) : (
-                <p>Drag 'n' drop some image files here, or click to select image</p>
+                <p>
+                  Drag 'n' drop some image files here, or click to select image
+                </p>
               )}
             </div>
           ) : (
-            <div style={{position:"relative"}}>
+            <div style={{ position: "relative" }}>
               <ClearIcon
                 onClick={() => setThumbnail(null)}
-                sx={{ position: "absolute", right: "235px", top: "7px",zIndex:1 ,color:"white"}}
+                sx={{
+                  position: "absolute",
+                  right: "235px",
+                  top: "7px",
+                  zIndex: 1,
+                  color: "white",
+                }}
               />
               <img
                 src={URL.createObjectURL(thumbnail)}
@@ -127,7 +200,8 @@ export default function upload() {
                 ),
               }}
             />
-            <button className="submit-btn">Submit</button>
+            <button onClick={()=>handleSubmit()} className="submit-btn">Submit</button>
+            <button disabled={!write} onClick={writeToSmartContract} className="submit-btn">Add to Smart Contract</button>
           </Stack>
         </Stack>
         <Stack direction="column" gap={6} sx={{ width: "45%" }}>
@@ -137,14 +211,22 @@ export default function upload() {
               {isDragActiveVid ? (
                 <p>Drop the video here ...</p>
               ) : (
-                <p>Drag 'n' drop some video files here, or click to select video</p>
+                <p>
+                  Drag 'n' drop some video files here, or click to select video
+                </p>
               )}
             </div>
           ) : (
-            <div style={{position:"relative"}}>
+            <div style={{ position: "relative" }}>
               <ClearIcon
                 onClick={() => setVideo(null)}
-                sx={{ position: "absolute", right: "7px", top: "7px",zIndex:1 ,color:"white"}}
+                sx={{
+                  position: "absolute",
+                  right: "7px",
+                  top: "7px",
+                  zIndex: 1,
+                  color: "white",
+                }}
               />
               <video
                 controls
@@ -154,7 +236,7 @@ export default function upload() {
             </div>
           )}
         </Stack>
-      </form>
+      </div>
     </Box>
   );
 }
