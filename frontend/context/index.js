@@ -1,11 +1,12 @@
 import axios from "axios";
 import { useContext, createContext } from "react";
 import { Web3Storage } from "web3.storage";
+import { ethers } from "ethers";
+import { peerplayABI, peerplayAddress } from "@/constants";
 
 const StateContext = createContext();
 
 export function StateContextProvider({ children }) {
-    
   async function uploadToIpfsPromise(file) {
     return new Promise(async (resolve, reject) => {
       try {
@@ -66,11 +67,31 @@ export function StateContextProvider({ children }) {
     });
   }
 
+  // Smart Contract Call
+  async function getVideoDetailsFunc(videoId) {
+    if (typeof window.ethereum !== "undefined") {
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      const contract = new ethers.Contract(
+        peerplayAddress,
+        peerplayABI,
+        signer
+      );
+      try {
+        const res = await contract.getVideoDetails(videoId);
+        return res;
+      } catch (error) {
+        console.log("Error", err);
+      }
+    }
+  }
+
   return (
     <StateContext.Provider
       value={{
         uploadToIpfsPromise,
         uploadVideoPromise,
+        getVideoDetailsFunc
       }}
     >
       {children}

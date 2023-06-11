@@ -1,8 +1,17 @@
 "use client";
 import Videos from "@/components/Videos";
 import { Box, Stack, Typography } from "@mui/material";
+import { useContractRead } from 'wagmi'
+import { peerplayAddress,peerplayABI } from "@/constants";
 
 export default function Home() {
+
+  const { data, isLoading } = useContractRead({
+    address: peerplayAddress,
+    abi: peerplayABI,
+    functionName: 'getAllVideos',
+  });
+  
   return (
     <Box
       p={2}
@@ -18,7 +27,7 @@ export default function Home() {
       <Typography variant="h4" fontWeight="bold" mb={2} sx={{ color: "white" }}>
         All <span style={{ color: "#289935" }}>videos</span>
       </Typography>
-      <Videos />
+      <Videos videos={data} isLoading={isLoading} />
     </Box>
   );
 }

@@ -50,6 +50,7 @@ export default function Navbar() {
         top: 0,
         justifyContent: "space-between",
         borderBottom: "1px solid #3d3d3d",
+        zIndex:10
       }}
     >
       <Link href={"/"}>

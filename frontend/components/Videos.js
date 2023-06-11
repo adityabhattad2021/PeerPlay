@@ -1,19 +1,9 @@
 "use client";
 import { Box, Stack } from "@mui/material";
 import VideoCard from "./VideoCard";
-import { useContractRead } from 'wagmi'
-import { peerplayAddress,peerplayABI } from "@/constants";
 import Loader from "./Loader";
 
-const dummyVideos = [1, 2, 34, 1, 2, 3, 3, 4, 4, 5, 5, 7, 8, 9, 1, 121, 12];
-
-export default function Videos() {
-
-  const { data, isError, isLoading,isSuccess } = useContractRead({
-    address: peerplayAddress,
-    abi: peerplayABI,
-    functionName: 'getAllVideos',
-  });
+export default function Videos({videos,isLoading,direction}) {
 
   if(isLoading){
     return (
@@ -25,7 +15,7 @@ export default function Videos() {
 
   return (
     <Stack
-      direction={"row"}
+      direction={direction ? direction : "row"}
       flexWrap="wrap"
       justifyContent="start"
       alignItems="start"
@@ -33,7 +23,7 @@ export default function Videos() {
       sx={{ flexDirection: { xs: "column", sm: "row" } }}
       overflow={"auto"}
     >
-      {data.map((data, idx) => (
+      {videos.map((data, idx) => (
         <Box key={idx}>
           <VideoCard video={data} />
         </Box>
