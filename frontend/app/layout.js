@@ -95,6 +95,7 @@ export default function RootLayout({ children }) {
 
   return (
     <html lang="en">
+      <title>Peerplay</title>
       <body className={inter.className}>
         <WagmiConfig config={wagmiConfig}>
           <RainbowKitProvider

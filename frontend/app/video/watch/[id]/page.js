@@ -7,17 +7,30 @@ import Videos from "@/components/Videos";
 import Loader from "@/components/Loader";
 import { useEffect, useState } from "react";
 import { useStateContext } from "@/context";
+import { useContractRead } from "wagmi";
+import { peerplayABI, peerplayAddress } from "@/constants";
 
 export default function Watch({ params }) {
   const [videoDetail, setVideoDetail] = useState(null);
   const [assetId, setAssetId] = useState(null);
   const { getVideoDetailsFunc } = useStateContext();
 
+  const { data:creatorVideos, isLoading:isCreatorVideosLoading } = useContractRead({
+    address: peerplayAddress,
+    abi: peerplayABI,
+    functionName: 'getVideosList',
+    args:[videoDetail?.creator],
+    enabled:Boolean(videoDetail),
+    chainId:80001,
+  });
+
+
   useEffect(() => {
     getVideoDetailsFunc(params.id)
       .then((video) => {
         setVideoDetail(video);
         setAssetId(video.livepeerHash);
+        console.log(video);
       })
       .catch((error) => {
         console.log(error);
@@ -28,6 +41,9 @@ export default function Watch({ params }) {
     enabled: Boolean(videoDetail),
     assetId,
   });
+
+  // console.log(assetId);
+  // console.log(asset);
 
 
   if (!asset) {
@@ -65,9 +81,9 @@ export default function Watch({ params }) {
         }}
       >
         <Box flex={1}>
-          <Box sx={{ width: "60vw", position: "sticky", top: "15px" }}>
+          <Box sx={{ width: "55vw", position: "sticky", top: "15px" }}>
             <Player
-              title="Some title"
+              title={`${videoDetail?.title}`}
               playbackId={asset?.data?.playbackId}
               aspectRatio="16to9"
               controls={{
@@ -106,7 +122,9 @@ export default function Watch({ params }) {
           px={2}
           py={{ md: 1, xs: 5 }}
           display="flex"
-          justifyContent="center"
+          flexDirection="column"
+  
+          alignItems="center"
           sx={{
             width:"25vw"
           }}
@@ -115,11 +133,11 @@ export default function Watch({ params }) {
             variant="h6"
             fontWeight="bold"
             mb={2}
-            sx={{ color: "white" }}
+            sx={{ color: "white",display:"inline-block",height:"50px",textAlign:"center"}}
           >
             More from <span style={{ color: "#289935" }}>Creator</span>
           </Typography>
-          <Videos videos={[]} isLoading={true} />
+          <Videos videos={creatorVideos} isLoading={isCreatorVideosLoading} direction={"column"} justifyContent={"center"}/>
         </Box>
       </Stack>
     </Box>

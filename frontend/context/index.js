@@ -86,7 +86,7 @@ export function StateContextProvider({ children }) {
         const res = await contract.getVideoDetails(videoId);
         return res;
       } catch (error) {
-        console.log("Error", err);
+        console.log("Error", error);
       }
     }
   }

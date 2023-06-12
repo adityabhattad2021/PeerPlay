@@ -87,12 +87,43 @@ export default function upload() {
     hash: data?.hash,
   });
 
+  function waitForIsLoading() {
+    return new Promise((resolve) => {
+      if (!isLoading) {
+        resolve();
+      } else {
+        const interval = setInterval(() => {
+          if (!isLoading) {
+            clearInterval(interval);
+            resolve();
+          }
+        }, 100);
+      }
+    });
+  }
+
+  function waitForNotIsSuccess() {
+    return new Promise((resolve) => {
+      if (isSuccess) {
+        resolve();
+      } else {
+        const interval = setInterval(() => {
+          if (isSuccess) {
+            clearInterval(interval);
+            resolve();
+          }
+        }, 100);
+      }
+    });
+  }
+
   const { uploadToIpfsPromise, uploadVideoPromise } = useStateContext();
 
   function writeToSmartContractPromise() {
     return new Promise(async (resolve, reject) => {
       try {
         write();
+        await Promise.all([waitForIsLoading()]);
         resolve();
       } catch (error) {
         reject(error);
@@ -102,8 +133,9 @@ export default function upload() {
 
   function writeToSmartContract() {
     toast.promise(writeToSmartContractPromise(), {
+      loading:"Updating the state on the smart contract 📝",
       success: () => {
-        return "Successfully writter to the smart contract";
+        return "Done updating!";
       },
       error: "Error writing to the Smart Contract",
     });
