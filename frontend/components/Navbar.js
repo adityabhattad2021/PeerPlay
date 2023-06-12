@@ -19,7 +19,7 @@ export default function Navbar() {
   const { connect, connectors, error, isLoading, pendingConnector } =
     useConnect();
     const ensName = useEnsName({
-      address: '0xa5cc3c03994db5b0d9a5eedd10cabab0813678ac',
+      address: address,
       chainId:1,
     })
     const ensAvatar = useEnsAvatar({

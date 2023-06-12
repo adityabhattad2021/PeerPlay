@@ -7,6 +7,7 @@ import ChatBubbleIcon from "@mui/icons-material/ChatBubble";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useRouter,usePathname } from "next/navigation";
 import { useAccount, useDisconnect } from "wagmi";
+import CustomButton from "./CustomButton";
 
 const pages = [
   { name: "New", icon: <HomeIcon /> ,path:"/"},
@@ -61,27 +62,10 @@ export default function Sidebar({ selectedPage, setSelectedPage }) {
         </button>
       ))}
       {(!notSmallScreen && isConnected) && (
-        <button
-          className="category-btn"
-          style={{
-            background: "#289935",
-            height: "40px",
-            color: "white",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-          onClick={() => disconnect()}
-        >
-          <span
-            style={{
-              white: "#289935",
-            }}
-            onClick={() => disconnect()}
-          >
-            Disconnect
-          </span>
-        </button>
+        <CustomButton
+          onClick={()=>disconnect()}
+          text="Disconnect"
+        />
       )}
     </Stack>
   );

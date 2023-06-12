@@ -28,7 +28,7 @@ export default function Feed({ children }) {
     <Stack
       sx={{ flexDirection: { sx: "column", md: "row" }, overflow: "auto" }}
     >
-      {!pathname.includes("video/watch") && (
+      {!pathname.includes("video/watch") && !pathname.includes("creator")  && (
         <Box
           sx={{
             position: "fixed",

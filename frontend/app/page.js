@@ -13,19 +13,19 @@ export default function Home() {
     chainId: 80001,
   });
 
-  async function sendNotification(data) {
-    try {
-      const response = await axios.post("/api/send-notification", data);
-      console.log(response);
-    } catch (err) {
-      console.error(err);
-    }
-  }
+  // async function sendNotification(data) {
+  //   try {
+  //     const response = await axios.post("/api/send-notification", data);
+  //     console.log(response);
+  //   } catch (err) {
+  //     console.error(err);
+  //   }
+  // }
 
-  sendNotification({
-    messageTitle: "Test title",
-    messageBody: "Hello, this is a test notification!",
-  });
+  // sendNotification({
+  //   messageTitle: "Test title",
+  //   messageBody: "Hello, this is a test notification!",
+  // });
 
   return (
     <Box

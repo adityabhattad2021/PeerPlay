@@ -17,6 +17,7 @@ import { usePrepareContractWrite, useContractWrite } from "wagmi";
 import { useDebounce } from "usehooks-ts";
 import { peerplayAddress, peerplayABI } from "@/constants";
 import { ethers } from "ethers";
+import CustomButton from "@/components/CustomButton";
 
 export default function upload() {
   // Form states
@@ -102,7 +103,7 @@ export default function upload() {
     });
   }
 
-  function waitForNotIsSuccess() {
+  function waitForIsSuccess() {
     return new Promise((resolve) => {
       if (isSuccess) {
         resolve();
@@ -252,14 +253,21 @@ export default function upload() {
             <button type="submit" className="submit-btn">
               Upload
             </button>
-            <button
+            {/* <button
               type="button"
               disabled={!write}
               onClick={writeToSmartContract}
               className="contract-btn"
             >
               Save to Smart Contract
-            </button>
+            </button> */}
+            <CustomButton
+              type="button"
+              disabled={!write}
+              onClick={writeToSmartContract}
+              className={"contract-btn"}
+              text="Save to Smart Contract"
+            />
           </Stack>
         </Stack>
         <Stack direction="column" gap={6} sx={{ width: "45%" }}>
