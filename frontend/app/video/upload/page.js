@@ -102,19 +102,15 @@ export default function upload() {
 
   function writeToSmartContract() {
     toast.promise(writeToSmartContractPromise(), {
-      success: ()=>{
-        if(isLoading){
-          return "Writing to Smart Contract..."
-        }else{
-          return "Successfully writter to the smart contract"
-        }
+      success: () => {
+        return "Successfully writter to the smart contract";
       },
       error: "Error writing to the Smart Contract",
     });
   }
 
   async function handleSubmit(e) {
-    e.preventDefault()
+    e.preventDefault();
     if (!title || !description || !price || !video || !thumbnail) {
       alert("Please fill all the fields!");
       return;
@@ -221,8 +217,17 @@ export default function upload() {
                 ),
               }}
             />
-            <button type="submit" className="submit-btn">Upload</button>
-            <button type="button" disabled={!write} onClick={writeToSmartContract} className="contract-btn">Save to Smart Contract</button>
+            <button type="submit" className="submit-btn">
+              Upload
+            </button>
+            <button
+              type="button"
+              disabled={!write}
+              onClick={writeToSmartContract}
+              className="contract-btn"
+            >
+              Save to Smart Contract
+            </button>
           </Stack>
         </Stack>
         <Stack direction="column" gap={6} sx={{ width: "45%" }}>

@@ -5,7 +5,7 @@ import Loader from "./Loader";
 
 export default function Videos({videos,isLoading}) {
 
-  if(isLoading){
+  if(isLoading || !videos){
     return (
       <div>
         <Loader/>

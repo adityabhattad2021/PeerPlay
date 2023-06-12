@@ -17,9 +17,14 @@ export function StateContextProvider({ children }) {
         const client = new Web3Storage({
           token: process.env.NEXT_PUBLIC_WEB3STORAGE_API_KEY,
         });
-        const cid = await client.put([file]);
+        const blob = file.slice(0, file.size, "image/png");
+        const forIPFS = new File([blob], "thumbnail.png", {
+          type: "image/png",
+        });
+        const cid = await client.put([forIPFS]);
         resolve(cid);
       } catch (error) {
+        console.log(error);
         reject(error);
       }
     });
@@ -91,7 +96,7 @@ export function StateContextProvider({ children }) {
       value={{
         uploadToIpfsPromise,
         uploadVideoPromise,
-        getVideoDetailsFunc
+        getVideoDetailsFunc,
       }}
     >
       {children}

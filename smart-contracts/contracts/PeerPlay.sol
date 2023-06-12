@@ -29,7 +29,7 @@ contract PeerPlay is Ownable{
      * @param creator Address of the creator
      * @param title Title of the video
      * @param description Description of the video
-     * @param livepeerHash Hash of the video on Livepeer
+     * @param livepeerId Hash of the video on Livepeer
      * @param thumbnailHash Hash of the thumbnail on IPFS
      * @param videoPrice Price of the video
      */
@@ -38,7 +38,7 @@ contract PeerPlay is Ownable{
         address creator;
         string title;
         string description;
-        string livepeerHash;
+        string livepeerId;
         string thumbnailHash;
         uint256 videoPrice;
     }
@@ -100,7 +100,7 @@ contract PeerPlay is Ownable{
      * @param videoId Video ID
      * @param title title of the video
      * @param description discription of the video
-     * @param livepeerHash livepeerHash of the video
+     * @param livepeerId livepeerId of the video
      * @param thumbnailHash IPFS hash of the thumbnail
      * @param videoPrice Price to mint the access NFT for the video
      */
@@ -109,7 +109,7 @@ contract PeerPlay is Ownable{
         uint256 indexed videoId,
         string title,
         string description,
-        string livepeerHash,
+        string livepeerId,
         string thumbnailHash,
         uint256 videoPrice
     );

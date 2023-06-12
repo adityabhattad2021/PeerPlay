@@ -10,7 +10,10 @@ export default function Home() {
     address: peerplayAddress,
     abi: peerplayABI,
     functionName: 'getAllVideos',
+    chainId:80001,
   });
+
+  console.log(data);
   
   return (
     <Box

@@ -1,28 +1,12 @@
 import { Typography, Card, CardContent, CardMedia } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { useEnsName } from "wagmi";
-import { create } from "ipfs-http-client";
+import { getFilesFromPath } from "web3.storage";
+// import { create } from "ipfs-http-client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
 export default function VideoCard({ video }) {
-  const [videoName, setVideoName] = useState();
-
-  useEffect(() => {
-    getImageName(video.thumbnailHash).then((name) => {
-      setVideoName(name);
-    });
-  }, []);
-
-  async function getImageName(thumbnailHash) {
-    const url = "https://dweb.link/api/v0";
-    const ipfs = create({ url });
-    const name = [];
-    for await (const link of ipfs.ls(thumbnailHash)) {
-      name.push(link);
-    }
-    return name[0].name;
-  }
 
   const ensName = useEnsName({
     address: video?.creator,
@@ -40,7 +24,7 @@ export default function VideoCard({ video }) {
     >
       <Link href={`/video/watch/${video.videoId.toString()}`}>
         <CardMedia
-          image={`${process.env.NEXT_PUBLIC_IPFS_START_URL}/${video.thumbnailHash}/${videoName}`}
+          image={`${process.env.NEXT_PUBLIC_IPFS_START_URL}/${video.thumbnailHash}/thumbnail.png`}
           alt={"dmeo tilt"}
           sx={{ width: { xs: "100%", sm: "358px" }, height: 180 }}
         />

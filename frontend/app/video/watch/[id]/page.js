@@ -29,6 +29,7 @@ export default function Watch({ params }) {
     assetId,
   });
 
+
   if (!asset) {
     return (
       <Box
@@ -65,11 +66,6 @@ export default function Watch({ params }) {
       >
         <Box flex={1}>
           <Box sx={{ width: "60vw", position: "sticky", top: "15px" }}>
-            {/* <ReactPlayer
-              url={`https://www.youtube.com/watch?v=reABCMNGM3w`}
-              className="react-player"
-              controls
-            /> */}
             <Player
               title="Some title"
               playbackId={asset?.data?.playbackId}

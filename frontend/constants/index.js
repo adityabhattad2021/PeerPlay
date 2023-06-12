@@ -1,4 +1,4 @@
-export const peerplayAddress = "0xf087d6276275F32728978Ef7eB20FA5735a62E53";
+export const peerplayAddress = "0x384e1A386f76A490269924C8ffF1742De7b818ef";
 export const peerplayABI = [
   {
     inputs: [
@@ -366,7 +366,7 @@ export const peerplayABI = [
     inputs: [
       { internalType: "string", name: "title", type: "string" },
       { internalType: "string", name: "description", type: "string" },
-      { internalType: "string", name: "livepeerHash", type: "string" },
+      { internalType: "string", name: "livepeerId", type: "string" },
       { internalType: "string", name: "thumbnailHash", type: "string" },
       { internalType: "uint256", name: "videoPrice", type: "uint256" },
     ],
