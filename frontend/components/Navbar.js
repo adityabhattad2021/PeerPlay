@@ -2,43 +2,47 @@
 import { Stack, useMediaQuery } from "@mui/material";
 import logo from "../assets/logo.svg";
 import Link from "next/link";
-import Image from "next/image";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import SearchBar from "./SearchBar";
-import {
-  useAccount,
-  useConnect,
-  useDisconnect,
-  useEnsAvatar,
-  useEnsName,
-} from "wagmi";
+import PushLogo from "@/assets/pushprotocol.svg";
+import Image from "next/image";
+import { useEffect } from "react";
+import { useAccount } from "wagmi";
+import { EmbedSDK } from "@pushprotocol/uiembed";
 
 export default function Navbar() {
   const notSmallScreen = useMediaQuery("(min-width:870px)");
-  const { address, connector, isConnected } = useAccount();
-  const { connect, connectors, error, isLoading, pendingConnector } =
-    useConnect();
-    const ensName = useEnsName({
-      address: address,
-      chainId:1,
-    })
-    const ensAvatar = useEnsAvatar({
-      name:ensName.data,
-      chainId:1,
-    })
-  const { disconnect } = useDisconnect();
+  const account = useAccount();
+  useEffect(() => {
+    if (account) {
+      // 'your connected wallet address'
+      EmbedSDK.init({
+        headerText: "Notifications", // optional
+        targetID: "sdk-trigger-id", // mandatory
+        appName: "Livepeer", // mandatory
+        user: account, // mandatory
+        chainId: 80001, // mandatory
+        viewOptions: {
+          type: "sidebar", // optional [default: 'sidebar', 'modal']
+          showUnreadIndicator: true, // optional
+          unreadIndicatorColor: "#289935",
+          unreadIndicatorPosition: "bottom-right",
+        },
+        theme: "dark",
+        onOpen: () => {
+          console.log("-> client dApp onOpen callback");
+        },
+        onClose: () => {
+          console.log("-> client dApp onClose callback");
+        },
+      });
+    }
 
-  // console.log("address", address);
-  // console.log("connector", connector);
-  // console.log("isConnected", isConnected);
-  // console.log("ensAvatar", ensAvatar);
-  // console.log("ensName", ensName);
-  // console.log("connect", connect);
-  // console.log("connectors", connectors);
-  // console.log("error", error);
-  // console.log("isLoading", isLoading);
-  // console.log("pendingConnector", pendingConnector);
-  // console.log("disconnect", disconnect);
+    return () => {
+      EmbedSDK.cleanup();
+    };
+  }, []);
+
   return (
     <Stack
       direction={notSmallScreen ? "row" : "column"}
@@ -50,7 +54,7 @@ export default function Navbar() {
         top: 0,
         justifyContent: "space-between",
         borderBottom: "1px solid #3d3d3d",
-        zIndex:10
+        zIndex: 10,
       }}
     >
       <Link href={"/"}>
@@ -73,10 +77,15 @@ export default function Navbar() {
         direction={notSmallScreen ? "row" : "column"}
         alignItems="center"
         justifyContent={notSmallScreen ? "flex-end" : "center"}
-        sx={{ display: { xs: "none", sm: "flex" } ,gap:2}}
+        sx={{ display: { xs: "none", sm: "flex" }, gap: 2 }}
       >
         <SearchBar />
         <ConnectButton chainStatus="full" />
+        {account.isConnected && (
+          <button className="push-btn" id="sdk-trigger-id">
+            <Image src={PushLogo} alt="push logo" width={50} height={50} />
+          </button>
+        )}
       </Stack>
     </Stack>
   );

@@ -124,6 +124,14 @@ a {
   color: #fff;
 }
 
+.push-btn{
+  /* filter: invert(1); */
+  background-color: black;
+  outline: none;
+  border: none;
+  cursor: pointer;
+}
+
 .submit-btn:disabled{
   cursor: not-allowed;
 }
