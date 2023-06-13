@@ -18,6 +18,7 @@ import { useDebounce } from "usehooks-ts";
 import { peerplayAddress, peerplayABI } from "@/constants";
 import { ethers } from "ethers";
 import CustomButton from "@/components/CustomButton";
+import sendNotificationPush from "@/utils/sendNotification";
 
 export default function upload() {
   // Form states
@@ -37,7 +38,7 @@ export default function upload() {
   const debouncedPrice = useDebounce(price, 10000);
 
   const router = useRouter();
-  const { isConnected } = useAccount();
+  const { address,isConnected } = useAccount();
   const onDropVideo = useCallback((acceptedFiles) => {
     setVideo(acceptedFiles[0]);
   }, []);
@@ -89,16 +90,20 @@ export default function upload() {
   });
 
   function waitForIsLoading() {
-    return new Promise((resolve) => {
-      if (!isLoading) {
-        resolve();
-      } else {
-        const interval = setInterval(() => {
-          if (!isLoading) {
-            clearInterval(interval);
-            resolve();
-          }
-        }, 100);
+    return new Promise((resolve,reject) => {
+      try{
+        if (!isLoading) {
+          resolve();
+        } else {
+          const interval = setInterval(() => {
+            if (!isLoading) {
+              clearInterval(interval);
+              resolve();
+            }
+          }, 100);
+        }
+      }catch(err){
+        reject(err)
       }
     });
   }
@@ -125,6 +130,10 @@ export default function upload() {
       try {
         write();
         await Promise.all([waitForIsLoading()]);
+        await sendNotificationPush({
+          messageTitle: `New Video Uploaded!`,
+          messageBody: `${address} just uploaded a new video`,
+        });
         resolve();
       } catch (error) {
         reject(error);
