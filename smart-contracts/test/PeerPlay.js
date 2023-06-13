@@ -41,10 +41,10 @@ describe("PeerPlay", function () {
       // upload a video
       const title = "Test Video";
       const description = "This is a test video";
-      const livepeerHash = "livepeerhash";
+      const livepeerId = "livepeerhash";
       const thumbnailHash = "thumbnailhash";
       const videoPrice = ethers.utils.parseEther("1");
-      const tx = await peerplay.connect(deployer).uploadVideo(title, description, livepeerHash, thumbnailHash, videoPrice);
+      const tx = await peerplay.connect(deployer).uploadVideo(title, description, livepeerId, thumbnailHash, videoPrice);
       await tx.wait();
     
       // check the video details
@@ -52,7 +52,7 @@ describe("PeerPlay", function () {
       const video = await peerplay.getVideoDetails(videoCount);
       expect(video.title).to.equal(title);
       expect(video.description).to.equal(description);
-      expect(video.livepeerHash).to.equal(livepeerHash);
+      expect(video.livepeerId).to.equal(livepeerId);
       expect(video.thumbnailHash).to.equal(thumbnailHash);
       expect(video.videoPrice).to.equal(videoPrice);
     });

@@ -7,7 +7,6 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 
 export default function VideoCard({ video }) {
-
   const ensName = useEnsName({
     address: video?.creator,
     chainId: 1,
@@ -35,16 +34,20 @@ export default function VideoCard({ video }) {
             {video.title}
           </Typography>
         </Link>
-        <Typography variant="subtitle2" color="gray">
-          {ensName.data
-            ? ensName.data
-            : (video?.creator).slice(0, 4) +
-              "..." +
-              (video?.creator).slice(-5, -1)}
-          <CheckCircleIcon
-            sx={{ fontSize: "12px", color: "gray", ml: "5px" }}
-          />
-        </Typography>
+        {video && (
+          <Link href={`/creator/${video?.creator}`}>
+            <Typography variant="subtitle2" color="gray">
+              {ensName.data
+                ? ensName.data
+                : (video?.creator).slice(0, 4) +
+                  "..." +
+                  (video?.creator).slice(-5, -1)}
+              <CheckCircleIcon
+                sx={{ fontSize: "12px", color: "gray", ml: "5px" }}
+              />
+            </Typography>
+          </Link>
+        )}
       </CardContent>
     </Card>
   );

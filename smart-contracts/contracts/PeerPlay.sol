@@ -155,7 +155,7 @@ contract PeerPlay is Ownable{
         require(msg.value > 0, "Amount must be greater than 0");
         uint256 supportPrice = calculateSupportPrice(creator);
         require(
-            msg.value == supportPrice,
+            msg.value >= supportPrice,
             "Amount must be greater than or equal to support price"
         );
         creators[creator].supporters += 1;
@@ -207,7 +207,7 @@ contract PeerPlay is Ownable{
         );
         videos[videoId] = createdVideo;
         creators[msg.sender].videos.push(createdVideo);
-
+        creators[msg.sender].supportPrice=calculateSupportPrice(msg.sender);
         PeerPlayTokens platformToken=PeerPlayTokens(platformTokenContract);
         // Mint access NFT for the creator, so they have access to their own video.
         platformToken.mintPlatformVideoNFT(msg.sender, videoId);
@@ -362,7 +362,7 @@ contract PeerPlay is Ownable{
      * @dev Returns the support price for a creator
      */
     function getSupportPrice(address creator) public view returns (uint256) {
-        return creators[creator].supportPrice;
+        return calculateSupportPrice(creator);
     }
 
     /**

@@ -253,14 +253,6 @@ export default function upload() {
             <button type="submit" className="submit-btn">
               Upload
             </button>
-            {/* <button
-              type="button"
-              disabled={!write}
-              onClick={writeToSmartContract}
-              className="contract-btn"
-            >
-              Save to Smart Contract
-            </button> */}
             <CustomButton
               type="button"
               disabled={!write}

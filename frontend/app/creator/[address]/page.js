@@ -2,33 +2,68 @@
 import { useState, useEffect } from "react";
 import { Box, CardContent, CardMedia, Typography } from "@mui/material";
 import Videos from "@/components/Videos";
-import { useAccount, useContractRead, useEnsAvatar, useEnsName } from "wagmi";
+import {
+  useAccount,
+  useContractRead,
+  useEnsAvatar,
+  useEnsName,
+  useContractWrite,
+  usePrepareContractWrite,
+} from "wagmi";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import axios from "axios";
 import CustomButton from "@/components/CustomButton";
 import { peerplayABI, peerplayAddress } from "@/constants";
+import { BigNumber, ethers } from "ethers";
+import { useDebounce } from "usehooks-ts";
 
-export default function CreatorDetail() {
-  const { address, connector, isConnected } = useAccount();
+export default function CreatorDetail({ params }) {
   const [imageURL, setImageURL] = useState();
-
+  const { isConnected } = useAccount();
   const ensName = useEnsName({
-    address: address,
-    chainId: 1,
-  });
-  const ensAvatar = useEnsAvatar({
-    name: ensName.data,
-    address: address,
+    enabled: Boolean(params?.address.length > 0),
+    address: params?.address,
     chainId: 1,
   });
 
-  const { data:creatorVideos, isLoading:isCreatorVideosLoading } = useContractRead({
+  const ensAvatar = useEnsAvatar({
+    enabled: Boolean(params?.address.length > 0),
+    address: params?.address,
+    chainId: 1,
+  });
+
+  const { data: creatorVideos, isLoading: isCreatorVideosLoading } =
+    useContractRead({
+      address: peerplayAddress,
+      abi: peerplayABI,
+      functionName: "getVideosList",
+      args: [params?.address],
+      enabled: Boolean(params?.address.length > 0),
+      chainId: 80001,
+    });
+
+  const { data: creatorSupportPrice, isLoading } = useContractRead({
     address: peerplayAddress,
     abi: peerplayABI,
-    functionName: 'getVideosList',
-    args:[address],
-    chainId:80001,
+    functionName: "calculateSupportPrice",
+    args: [params?.address],
+    enabled: Boolean(params?.address.length > 0),
+    chainId: 80001,
   });
+
+  const debouncedPrice = useDebounce(creatorSupportPrice, 10000);
+
+
+  const { config } = usePrepareContractWrite({
+    address: peerplayAddress,
+    abi: peerplayABI,
+    functionName: "supportCreator",
+    enabled: Boolean(debouncedPrice),
+    args: [params?.address],
+    value:creatorSupportPrice
+  });
+
+  const { data, write } = useContractWrite(config);
 
   async function setImageURLFunc() {
     if (ensAvatar.data) {
@@ -47,7 +82,6 @@ export default function CreatorDetail() {
     setImageURLFunc()
       .then((image) => {
         setImageURL(image);
-        console.log(image);
       })
       .catch((error) => {
         console.log(error);
@@ -103,29 +137,41 @@ export default function CreatorDetail() {
               <Typography variant="h6">
                 {ensName.data
                   ? ensName.data
-                  : `${address.slice(0, 4)}...${address.slice(-5, -1)}`}
-                  <CheckCircleIcon sx={{ fontSize: '14px', color: 'gray', ml: '5px' }} />
+                  : params?.address
+                  ? `${params?.address.slice(0, 4)}...${params?.address.slice(
+                      -5,
+                      -1
+                    )}`
+                  : ""}
+                <CheckCircleIcon
+                  sx={{ fontSize: "14px", color: "gray", ml: "5px" }}
+                />
               </Typography>
             </CardContent>
           </Box>
           <Box
             sx={{
-              display:"flex",
-              alignItems:"center",
-              justifyContent:"center",
-              mt:"-180px",
-              mb:"50px"
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              mt: "-180px",
+              mb: "50px",
             }}
           >
             <CustomButton
-              onClick={()=>{}}
+              onClick={() => write?.()}
               text="Support Creator"
+              // disabled={!isConnected || !write}
             />
           </Box>
         </Box>
         <Box p={2} display="flex">
           <Box sx={{ mr: { sm: "100px" } }} />
-          <Videos videos={creatorVideos} isLoading={isCreatorVideosLoading} direction={"column"} />
+          <Videos
+            videos={creatorVideos}
+            isLoading={isCreatorVideosLoading}
+            direction={"column"}
+          />
         </Box>
       </Box>
     </div>
