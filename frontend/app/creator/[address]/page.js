@@ -10,16 +10,19 @@ import {
   useContractWrite,
   usePrepareContractWrite,
 } from "wagmi";
+import ChatBubbleIcon from "@mui/icons-material/ChatBubble";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import axios from "axios";
 import CustomButton from "@/components/CustomButton";
 import { peerplayABI, peerplayAddress } from "@/constants";
-import { BigNumber, ethers } from "ethers";
 import { useDebounce } from "usehooks-ts";
+import { useStateContext } from "@/context";
 
 export default function CreatorDetail({ params }) {
+  const { address } = useAccount();
   const [imageURL, setImageURL] = useState();
-  const { isConnected } = useAccount();
+  const [isSupporter, setIsSupporter] = useState(true);
+  const { checkIfSupporterFunc, fetchImageWithRateLimitHandling } =
+    useStateContext();
   const ensName = useEnsName({
     enabled: Boolean(params?.address.length > 0),
     address: params?.address,
@@ -42,7 +45,7 @@ export default function CreatorDetail({ params }) {
       chainId: 80001,
     });
 
-  const { data: creatorSupportPrice, isLoading } = useContractRead({
+  const { data: creatorSupportPrice } = useContractRead({
     address: peerplayAddress,
     abi: peerplayABI,
     functionName: "calculateSupportPrice",
@@ -53,17 +56,19 @@ export default function CreatorDetail({ params }) {
 
   const debouncedPrice = useDebounce(creatorSupportPrice, 10000);
 
-
   const { config } = usePrepareContractWrite({
     address: peerplayAddress,
     abi: peerplayABI,
     functionName: "supportCreator",
-    enabled: Boolean(debouncedPrice),
+    enabled: Boolean(debouncedPrice) && !Boolean(isSupporter),
     args: [params?.address],
-    value:creatorSupportPrice
+    value: creatorSupportPrice,
   });
 
-  const { data, write } = useContractWrite(config);
+  const { write } = useContractWrite(config);
+  console.log(isSupporter);
+
+  const avatarCache = new Map();
 
   async function setImageURLFunc() {
     if (ensAvatar.data) {
@@ -71,9 +76,12 @@ export default function CreatorDetail({ params }) {
     } else {
       const randomNumber =
         Math.floor(Math.random() * (1000000000 - 100000 + 1)) + 100000;
-      const api = "https://api.multiavatar.com";
-      const image = await axios.get(`${api}/${randomNumber}`);
+      if (avatarCache.has(randomNumber)) {
+        return avatarCache.get(randomNumber);
+      }
+      const image = await fetchImageWithRateLimitHandling(randomNumber);
       const buffer = new Buffer(image.data).toString("base64");
+      avatarCache.set(randomNumber, `data:image/svg+xml;base64,${buffer}`);
       return `data:image/svg+xml;base64,${buffer}`;
     }
   }
@@ -87,6 +95,16 @@ export default function CreatorDetail({ params }) {
         console.log(error);
       });
   }, []);
+
+  useState(() => {
+    checkIfSupporterFunc(params?.address)
+      .then((isSupporter) => {
+        setIsSupporter(isSupporter)
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }, [params]);
 
   return (
     <div>
@@ -158,11 +176,34 @@ export default function CreatorDetail({ params }) {
               mb: "50px",
             }}
           >
-            <CustomButton
-              onClick={() => write?.()}
-              text="Support Creator"
-              // disabled={!isConnected || !write}
-            />
+            {!isSupporter ? (
+              <CustomButton
+                // onClick={write}
+                text="Support Creator"
+                disabled={!write}
+              />
+            ) : (
+              <div
+                  style={{
+                    display:"flex",
+                    justifyContent:"space-around",
+                    width:"50%"
+                  }} 
+              >
+                <CustomButton
+                  // onClick={write}
+                  text="Chat With Creator"
+                  disabled={!write}
+                  className="creator-page-btn"
+                />
+                <CustomButton
+                  // onClick={write}
+                  text="Video Call"
+                  disabled={!write}
+                  className="creator-page-btn"
+                />
+              </div>
+            )}
           </Box>
         </Box>
         <Box p={2} display="flex">

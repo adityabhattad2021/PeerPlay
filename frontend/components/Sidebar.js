@@ -3,7 +3,6 @@ import { Stack } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
 import UploadIcon from "@mui/icons-material/Upload";
 import StreamIcon from "@mui/icons-material/Stream";
-import ChatBubbleIcon from "@mui/icons-material/ChatBubble";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useRouter,usePathname } from "next/navigation";
 import { useAccount, useDisconnect } from "wagmi";
@@ -13,7 +12,6 @@ const pages = [
   { name: "New", icon: <HomeIcon /> ,path:"/"},
   { name: "Upload", icon: <UploadIcon /> ,path:'/video/upload'},
   { name: "Minted Videos", icon: <StreamIcon />,path:'/video/purchased' },
-  { name: "Push Chat", icon: <ChatBubbleIcon />,path:'/chat' },
 ];
 
 export default function Sidebar({ selectedPage, setSelectedPage }) {

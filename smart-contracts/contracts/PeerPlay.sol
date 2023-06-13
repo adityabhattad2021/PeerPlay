@@ -359,14 +359,6 @@ contract PeerPlay is Ownable{
 
     /**
      * @param creator Address of the creator
-     * @dev Returns the support price for a creator
-     */
-    function getSupportPrice(address creator) public view returns (uint256) {
-        return calculateSupportPrice(creator);
-    }
-
-    /**
-     * @param creator Address of the creator
      * @dev Returns the list of supporters for a creator
      */
     function getSupportersList(

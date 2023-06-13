@@ -91,12 +91,51 @@ export function StateContextProvider({ children }) {
     }
   }
 
+
+  async function checkIfSupporterFunc(creator) {
+    console.log(creator);
+    if (typeof window.ethereum !== "undefined" && !(creator===undefined)) {
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      const contract = new ethers.Contract(
+        peerplayAddress,
+        peerplayABI,
+        signer
+      );
+      try {
+        const res = await contract.checkIfSupporter(creator);
+        return res;
+      } catch (error) {
+        console.log("Error", error);
+      }
+    }
+  }
+
+  async function fetchImageWithRateLimitHandling(randomNumber) {
+    try {
+      
+      const api = "https://api.multiavatar.com";
+      const image = await axios.get(`${api}/${randomNumber}`);
+      return image;
+    } catch (error) {
+      if (error.response && error.response.status === 429) { // 429 status code indicates rate limit exceeded
+        // Wait for a certain period (e.g., 5 seconds) before retrying
+        await new Promise(resolve => setTimeout(resolve, 5000));
+        return fetchImageWithRateLimitHandling();
+      } else {
+        throw error;
+      }
+    }
+  }
+
   return (
     <StateContext.Provider
       value={{
         uploadToIpfsPromise,
         uploadVideoPromise,
         getVideoDetailsFunc,
+        checkIfSupporterFunc,
+        fetchImageWithRateLimitHandling,
       }}
     >
       {children}
