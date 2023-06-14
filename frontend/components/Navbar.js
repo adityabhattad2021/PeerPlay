@@ -81,11 +81,10 @@ export default function Navbar() {
       >
         <SearchBar />
         <ConnectButton chainStatus="full" />
-        {account.isConnected && (
-          <button className="push-btn" id="sdk-trigger-id">
-            <Image src={PushLogo} alt="push logo" width={50} height={50} />
-          </button>
-        )}
+
+        <button className="push-btn" id="sdk-trigger-id">
+          <Image src={PushLogo} alt="push logo" width={50} height={50} />
+        </button>
       </Stack>
     </Stack>
   );

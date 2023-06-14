@@ -91,10 +91,26 @@ export function StateContextProvider({ children }) {
     }
   }
 
+  async function checkIfUserHasMintedVideo(videoId) {
+    if (typeof window.ethereum !== "undefined") {
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      const contract = new ethers.Contract(
+        peerplayAddress,
+        peerplayABI,
+        signer
+      );
+      try {
+        const res = await contract.getUserMintedVideos();
+      } catch (error) {
+        console.log("Error", error);
+      }
+    }
+  }
 
   async function checkIfSupporterFunc(creator) {
     console.log(creator);
-    if (typeof window.ethereum !== "undefined" && !(creator===undefined)) {
+    if (typeof window.ethereum !== "undefined" && !(creator === undefined)) {
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const signer = provider.getSigner();
       const contract = new ethers.Contract(
@@ -111,16 +127,61 @@ export function StateContextProvider({ children }) {
     }
   }
 
+  async function uploadVideo(
+    videoTitle,
+    videoDescription,
+    videoAssetId,
+    videoCid,
+    price
+  ) {
+    const videoPrice = ethers.utils.parseEther(price);
+    if (typeof window.ethereum !== "undefined") {
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      const contract = new ethers.Contract(
+        peerplayAddress,
+        peerplayABI,
+        signer
+      );
+      try{
+        const res = await contract.uploadVideo(videoTitle,videoDescription,videoAssetId,videoCid,videoPrice);
+        return res;
+      }catch(error){
+        console.log(error);
+      }
+    }
+  }
+
+  async function mintVideoNFT(videoId, videoPrice) {
+    if (typeof window.ethereum !== "undefined" && !(creator === undefined)) {
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      const contract = new ethers.Contract(
+        peerplayAddress,
+        peerplayABI,
+        signer
+      );
+      try {
+        const res = await contract.mintAccessNFTForVideo(videoId, {
+          value: ethers.utils.parseEther(videoPrice),
+        });
+        return res;
+      } catch (error) {
+        console.log("Error", error);
+      }
+    }
+  }
+
   async function fetchImageWithRateLimitHandling(randomNumber) {
     try {
-      
       const api = "https://api.multiavatar.com";
       const image = await axios.get(`${api}/${randomNumber}`);
       return image;
     } catch (error) {
-      if (error.response && error.response.status === 429) { // 429 status code indicates rate limit exceeded
+      if (error.response && error.response.status === 429) {
+        // 429 status code indicates rate limit exceeded
         // Wait for a certain period (e.g., 5 seconds) before retrying
-        await new Promise(resolve => setTimeout(resolve, 5000));
+        await new Promise((resolve) => setTimeout(resolve, 5000));
         return fetchImageWithRateLimitHandling();
       } else {
         throw error;
@@ -136,6 +197,9 @@ export function StateContextProvider({ children }) {
         getVideoDetailsFunc,
         checkIfSupporterFunc,
         fetchImageWithRateLimitHandling,
+        mintVideoNFT,
+        checkIfUserHasMintedVideo,
+        uploadVideo
       }}
     >
       {children}

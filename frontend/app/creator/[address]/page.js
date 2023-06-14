@@ -18,7 +18,7 @@ import { useDebounce } from "usehooks-ts";
 import { useStateContext } from "@/context";
 
 export default function CreatorDetail({ params }) {
-  const { address } = useAccount();
+  const { address,isConnected } = useAccount();
   const [imageURL, setImageURL] = useState();
   const [isSupporter, setIsSupporter] = useState(true);
   const { checkIfSupporterFunc, fetchImageWithRateLimitHandling } =

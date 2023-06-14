@@ -29,7 +29,7 @@ export default function Watch({ params }) {
     getVideoDetailsFunc(params.id)
       .then((video) => {
         setVideoDetail(video);
-        setAssetId(video.livepeerHash);
+        setAssetId(video.livepeerId);
         console.log(video);
       })
       .catch((error) => {

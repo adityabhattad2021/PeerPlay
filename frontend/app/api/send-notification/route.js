@@ -24,7 +24,7 @@ export const POST = async (req, res) => {
         cta: "Check out Peerplay now!",
         img: "",
       },
-      channel: `eip155:5:${PA}`, // your channel address
+      channel: `eip155:80001:${PA}`, // your channel address
       env: "staging",
     });
     console.log(apiResponse.status);

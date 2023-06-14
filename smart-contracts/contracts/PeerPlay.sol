@@ -476,4 +476,12 @@ contract PeerPlay is Ownable{
         return isSupporter[msg.sender][creator];
     }
 
+    function checkIfAccessToVideo(
+        uint256 videoId
+    ) public view returns(bool){
+        PeerPlayTokens platformToken=PeerPlayTokens(platformTokenContract);
+        bool hasAccess = platformToken.balanceOf(msg.sender, videoId) == 1;
+        return hasAccess;
+    }   
+
 }

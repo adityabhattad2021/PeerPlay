@@ -25,36 +25,34 @@ a {
   background-color: transparent;
 }
 
-.search-bar{
-  border:none;
-  outline:none;
-  width:350px;
+.search-bar {
+  border: none;
+  outline: none;
+  width: 350px;
 }
-
 
 .category-btn:hover {
   background-color: #289935 !important;
   color: white !important;
 }
 
-.category-btn:hover span{
+.category-btn:hover span {
   color: white !important;
 }
 
-
-.search-bar{
-  border:none;
-  outline:none;
-  width:350px;
+.search-bar {
+  border: none;
+  outline: none;
+  width: 350px;
 }
 
-.category-btn{
+.category-btn {
   font-weight: bold !important;
   text-transform: capitalize;
   display: flex;
   align-items: center;
   justify-content: start;
-  cursor:pointer;
+  cursor: pointer;
   background: transparent;
   outline: none;
   border: none;
@@ -65,13 +63,13 @@ a {
   transition: all 0.3s ease;
 }
 
-.submit-btn{
+.submit-btn {
   font-weight: bold !important;
   text-transform: capitalize;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor:pointer;
+  cursor: pointer;
   background: #289935;
   outline: none;
   border: none;
@@ -84,14 +82,13 @@ a {
   color: #fff;
 }
 
-
-.contract-btn{
+.contract-btn {
   font-weight: bold !important;
   text-transform: capitalize;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor:pointer;
+  cursor: pointer;
   background: #289935;
   outline: none;
   border: none;
@@ -104,14 +101,13 @@ a {
   color: #fff;
 }
 
-
-.creator-page-btn{
+.creator-page-btn {
   font-weight: bold !important;
   text-transform: capitalize;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor:pointer;
+  cursor: pointer;
   background: #289935;
   outline: none;
   border: none;
@@ -124,7 +120,7 @@ a {
   color: #fff;
 }
 
-.push-btn{
+.push-btn {
   /* filter: invert(1); */
   background-color: black;
   outline: none;
@@ -132,15 +128,25 @@ a {
   cursor: pointer;
 }
 
-.submit-btn:disabled{
+.link-btn {
+  padding: 0;
+  border: none;
+  outline: none;
+  font: inherit;
+  color: inherit;
+  background: none;
+  cursor: pointer;
+}
+
+.submit-btn:disabled {
   cursor: not-allowed;
 }
 
-.contract-btn:disabled{
+.contract-btn:disabled {
   cursor: not-allowed;
 }
 
-.form-box{
+.form-box {
   padding: 30px;
   width: calc(100%);
   height: 85%;
@@ -148,7 +154,7 @@ a {
   display: flex;
 }
 
-.dropzone-thumbnail{
+.dropzone-thumbnail {
   width: 60%;
   height: 200px;
   object-fit: cover;
@@ -161,7 +167,7 @@ a {
   padding: 20px;
 }
 
-.upload-thumbnail{
+.upload-thumbnail {
   width: 60%;
   height: 200px;
   object-fit: cover;
@@ -174,7 +180,7 @@ a {
   position: relative;
 }
 
-.dropzone-video{
+.dropzone-video {
   width: 100%;
   height: 400px;
   object-fit: cover;
@@ -187,7 +193,7 @@ a {
   padding: 20px;
 }
 
-.upload-video{
+.upload-video {
   width: 100%;
   height: 400px;
   object-fit: cover;
@@ -200,14 +206,14 @@ a {
 }
 
 @media screen and (max-width: 900px) {
-  .category-btn{
+  .category-btn {
     margin: 10px;
   }
 }
 
-@media screen and (max-width:800px){
-  .copyright{
-    display:none !important;
+@media screen and (max-width: 800px) {
+  .copyright {
+    display: none !important;
   }
 }
 

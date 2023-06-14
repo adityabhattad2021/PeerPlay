@@ -29,16 +29,10 @@ export default function upload() {
   const [thumbnail, setThumbnail] = useState(null);
   const [cid, setCid] = useState("");
   const [assetId, setAssetId] = useState("");
-
-  // Smart Contract Paramaters
-  const debouncedTitle = useDebounce(title, 10000);
-  const debouncedDesc = useDebounce(description, 10000);
-  const debouncedAssetId = useDebounce(assetId, 10000);
-  const debouncedCid = useDebounce(cid, 10000);
-  const debouncedPrice = useDebounce(price, 10000);
+  const { uploadVideo } = useStateContext();
 
   const router = useRouter();
-  const { address,isConnected } = useAccount();
+  const { address, isConnected } = useAccount();
   const onDropVideo = useCallback((acceptedFiles) => {
     setVideo(acceptedFiles[0]);
   }, []);
@@ -64,78 +58,27 @@ export default function upload() {
     maxFiles: 1,
   });
 
-  // Smart Contract Call
-  const { config } = usePrepareContractWrite({
-    address: peerplayAddress,
-    abi: peerplayABI,
-    functionName: "uploadVideo",
-    args: [
-      debouncedTitle,
-      debouncedDesc,
-      debouncedAssetId,
-      debouncedCid,
-      ethers.utils.parseEther(debouncedPrice),
-    ],
-    enabled:
-      debouncedTitle.length > 0 &&
-      debouncedDesc.length > 0 &&
-      debouncedAssetId.length > 0 &&
-      debouncedCid.length > 0 &&
-      debouncedPrice.length > 0,
-  });
-
-  const { data, write } = useContractWrite(config);
-  const { isLoading, isSuccess } = useWaitForTransaction({
-    hash: data?.hash,
-  });
-
-  function waitForIsLoading() {
-    return new Promise((resolve,reject) => {
-      try{
-        if (!isLoading) {
-          resolve();
-        } else {
-          const interval = setInterval(() => {
-            if (!isLoading) {
-              clearInterval(interval);
-              resolve();
-            }
-          }, 100);
-        }
-      }catch(err){
-        reject(err)
-      }
-    });
-  }
-
-  function waitForIsSuccess() {
-    return new Promise((resolve) => {
-      if (isSuccess) {
-        resolve();
-      } else {
-        const interval = setInterval(() => {
-          if (isSuccess) {
-            clearInterval(interval);
-            resolve();
-          }
-        }, 100);
-      }
-    });
-  }
-
   const { uploadToIpfsPromise, uploadVideoPromise } = useStateContext();
 
   function writeToSmartContractPromise() {
     return new Promise(async (resolve, reject) => {
       try {
-        write();
-        await Promise.all([waitForIsLoading()]);
-        await sendNotificationPush({
-          messageTitle: `New Video Uploaded!`,
-          messageBody: `${address} just uploaded a new video`,
-        });
+        if (
+          title.length > 0 &&
+          description.length > 0 &&
+          assetId.length > 0 &&
+          cid.length > 0 &&
+          price
+        ) {
+          await uploadVideo(title, description , assetId, cid, price);
+          await sendNotificationPush({
+            messageTitle: `New Video Uploaded!`,
+            messageBody: `${address} just uploaded a new video`,
+          });
+        }
         resolve();
       } catch (error) {
+        console.log(error);
         reject(error);
       }
     });
@@ -143,7 +86,7 @@ export default function upload() {
 
   function writeToSmartContract() {
     toast.promise(writeToSmartContractPromise(), {
-      loading:"Updating the state on the smart contract 📝",
+      loading: "Updating the state on the smart contract 📝",
       success: () => {
         return "Done updating!";
       },
@@ -264,7 +207,6 @@ export default function upload() {
             </button>
             <CustomButton
               type="button"
-              disabled={!write}
               onClick={writeToSmartContract}
               className={"contract-btn"}
               text="Save to Smart Contract"

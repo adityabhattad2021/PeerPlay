@@ -41,7 +41,7 @@ describe("PeerPlay", function () {
       // upload a video
       const title = "Test Video";
       const description = "This is a test video";
-      const livepeerId = "livepeerhash";
+      const livepeerId = "livepeerId";
       const thumbnailHash = "thumbnailhash";
       const videoPrice = ethers.utils.parseEther("1");
       const tx = await peerplay.connect(deployer).uploadVideo(title, description, livepeerId, thumbnailHash, videoPrice);
