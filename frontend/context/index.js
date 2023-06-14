@@ -101,7 +101,9 @@ export function StateContextProvider({ children }) {
         signer
       );
       try {
-        const res = await contract.getUserMintedVideos();
+        const res = await contract.checkIfAccessToVideo(videoId);
+        console.log("res is ",res);
+        return res;
       } catch (error) {
         console.log("Error", error);
       }
@@ -143,17 +145,25 @@ export function StateContextProvider({ children }) {
         peerplayABI,
         signer
       );
-      try{
-        const res = await contract.uploadVideo(videoTitle,videoDescription,videoAssetId,videoCid,videoPrice);
+      try {
+        const res = await contract.uploadVideo(
+          videoTitle,
+          videoDescription,
+          videoAssetId,
+          videoCid,
+          videoPrice
+        );
         return res;
-      }catch(error){
+      } catch (error) {
         console.log(error);
       }
     }
   }
 
   async function mintVideoNFT(videoId, videoPrice) {
-    if (typeof window.ethereum !== "undefined" && !(creator === undefined)) {
+    const formattedPrice = ethers.utils.formatEther(videoPrice.toString());
+    console.log(formattedPrice);
+    if (typeof window.ethereum !== "undefined") {
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const signer = provider.getSigner();
       const contract = new ethers.Contract(
@@ -162,9 +172,41 @@ export function StateContextProvider({ children }) {
         signer
       );
       try {
-        const res = await contract.mintAccessNFTForVideo(videoId, {
-          value: ethers.utils.parseEther(videoPrice),
+        const gasEstimate = await contract.estimateGas.mintAccessNFTForVideo(videoId, {
+          value: ethers.utils.parseEther(formattedPrice),
         });
+        const res = await contract.mintAccessNFTForVideo(videoId, {
+          value: ethers.utils.parseEther(formattedPrice),
+          gasLimit: gasEstimate,
+        });
+        await res.wait();
+        return res;
+      } catch (error) {
+        console.log("Error", error);
+      }
+    }
+  }
+  
+
+  async function supportCreator(creatorAddress,supportPrice) {
+    const formattedPrice = ethers.utils.formatEther(supportPrice.toString());
+    console.log(formattedPrice);
+    if (typeof window.ethereum !== "undefined") {
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      const contract = new ethers.Contract(
+        peerplayAddress,
+        peerplayABI,
+        signer
+      );
+      try {
+        const gasLimit = 50000; // Set a reasonable gas limit value
+        const res = await contract.supportCreator(creatorAddress, {
+          value: ethers.utils.parseEther(formattedPrice).toString(),
+          gasLimit: gasLimit,
+        });
+        await res.wait()
+        console.log(res);
         return res;
       } catch (error) {
         console.log("Error", error);
@@ -199,7 +241,8 @@ export function StateContextProvider({ children }) {
         fetchImageWithRateLimitHandling,
         mintVideoNFT,
         checkIfUserHasMintedVideo,
-        uploadVideo
+        uploadVideo,
+        supportCreator
       }}
     >
       {children}

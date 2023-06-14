@@ -178,7 +178,7 @@ export default function CreatorDetail({ params }) {
           >
             {!isSupporter ? (
               <CustomButton
-                // onClick={write}
+                onClick={write}
                 text="Support Creator"
                 disabled={!write}
               />

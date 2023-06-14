@@ -27,6 +27,7 @@ export default function Sidebar({ selectedPage, setSelectedPage }) {
         overflowY: "auto",
         height: { sx: "auto", md: "90%" },
         flexDirection: { md: "column" },
+        pt:"5px",
       }}
     >
       {pages.map((page) => (

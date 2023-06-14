@@ -273,27 +273,31 @@ contract PeerPlay is Ownable{
      * @param amount Amount of ETH to distribute
      * @dev Distributes the revenue among the creator and supporters
      */
-    function distributeRevenue(
-        address creator,
-        uint256 amount,
-        uint256 videoId
-    ) internal {
-        uint256 creatorShare = (amount * 80) / 100;
-        uint256 supporterShare = (amount * 19) / 100;
-        uint256 platformShare = (amount * 1) / 100;
+   function distributeRevenue(
+    address creator,
+    uint256 amount,
+    uint256 videoId
+) internal {
+    uint256 creatorShare = (amount * 80) / 100;
+    uint256 supporterShare = (amount * 19) / 100;
+    uint256 platformShare = (amount * 1) / 100;
 
-        creatorRevenueShare[creator] += creatorShare;
-        platformRevenueShare += platformShare;
+    creatorRevenueShare[creator] += creatorShare;
+    platformRevenueShare += platformShare;
 
-        uint256 sharePerSupporter = supporterShare /
-            creators[creator].supporters;
+    if (creators[creator].supporters > 0) {
+        uint256 sharePerSupporter = supporterShare / creators[creator].supporters;
         for (uint256 i = 0; i < creators[creator].supportersList.length; i++) {
             address supporter = creators[creator].supportersList[i];
             supporterRevenueShare[supporter] += sharePerSupporter;
         }
-
-        emit RevenueDistributed(videoId, amount);
+    } else {
+        creatorRevenueShare[creator] += supporterShare;
     }
+
+    emit RevenueDistributed(videoId, amount);
+}
+
 
     /**
      * @dev Withdraws the revenue share for a supporter

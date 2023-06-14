@@ -3,7 +3,7 @@ import Videos from "@/components/Videos";
 import { Box, Stack, Typography } from "@mui/material";
 import { useContractRead } from "wagmi";
 import { peerplayAddress, peerplayABI } from "@/constants";
-
+import sendNotificationPush from "@/utils/sendNotification";
 
 export default function Home() {
   const { data, isLoading } = useContractRead({
@@ -12,8 +12,7 @@ export default function Home() {
     functionName: "getAllVideos",
     chainId: 80001,
   });
-
-
+  
   return (
     <Box
       p={2}

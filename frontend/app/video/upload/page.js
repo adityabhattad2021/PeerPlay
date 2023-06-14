@@ -87,9 +87,7 @@ export default function upload() {
   function writeToSmartContract() {
     toast.promise(writeToSmartContractPromise(), {
       loading: "Updating the state on the smart contract 📝",
-      success: () => {
-        return "Done updating!";
-      },
+      success: "Done updating!",
       error: "Error writing to the Smart Contract",
     });
   }

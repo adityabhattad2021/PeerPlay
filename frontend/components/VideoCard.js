@@ -22,6 +22,7 @@ import { connect } from "@wagmi/core";
 import { InjectedConnector } from "@wagmi/core/connectors/injected";
 import { useStateContext } from "@/context";
 import { peerplayABI, peerplayAddress } from "@/constants";
+import { toast } from "react-hot-toast";
 
 const style = {
   position: "absolute",
@@ -43,24 +44,12 @@ const style = {
 };
 
 export default function VideoCard({ video }) {
-  const [hasMinted, setHasMinted] = useState(false);
-
   const { address, isConnected } = useAccount();
-  const { checkIfUserHasMintedVideo } = useStateContext();
+  const { checkIfUserHasMintedVideo, mintVideoNFT } = useStateContext();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
-
-  useEffect(() => {
-    checkIfUserHasMintedVideo()
-      .then((value) => {
-        setHasMinted(value);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  });
 
   async function connectWallet() {
     await connect({
@@ -88,36 +77,42 @@ export default function VideoCard({ video }) {
       // console.log("working");
       connectWallet();
     } else {
-      console.log(hasMinted);
-      // if (hasMinted) {
-      //   log
-      //   // router.push(`/video/watch/${video.videoId.toString()}`);
-      // } else {
-      //   // handleOpen();
-      // }
+      checkIfUserHasMintedVideo(video.videoId)
+      .then((value) => {
+        if (value) {
+          router.push(`/video/watch/${video.videoId.toString()}`);
+        } else {
+          handleOpen();
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+      
     }
   }
 
-  function waitForIsSuccess() {
-    return new Promise((resolve) => {
-      if (isSuccess) {
+  function mintNFTPromise() {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const res = await mintVideoNFT(video.videoId, video.videoPrice);
+        console.log(res);
         resolve();
-      } else {
-        const interval = setInterval(() => {
-          if (isSuccess) {
-            clearInterval(interval);
-            resolve();
-          }
-        }, 100);
+      } catch (error) {
+        console.log(error);
+        reject(error)
       }
     });
   }
 
-  function handleMint() {
-    write();
-    Promise.all([waitForIsSuccess()]).then(() => {
-      router.push(`/video/watch/${video.videoId.toString()}`);
+  function handleMintNFT() {
+    toast.promise(mintNFTPromise(), {
+      loading: "Minting an awesome NFT for you!🚀",
+      success: "Enjoy the video now",
+      error: "There was an error minting the video",
     });
+    // mintNFTPromise(video.videoId, video.videoPrice);
+    
   }
 
   return (
@@ -141,7 +136,7 @@ export default function VideoCard({ video }) {
           backgroundColor: "#1E1E1E",
           height: "106px",
           display: "flex",
-          mt:"-4px",
+          mt: "-4px",
           flexDirection: "column",
           alignItems: "flex-start",
           mb: "2px",
@@ -197,7 +192,7 @@ export default function VideoCard({ video }) {
               justifyContent: "center",
             }}
           >
-            <button onClick={()=>{}} className="contract-btn">
+            <button onClick={() => handleMintNFT()} className="contract-btn">
               Mint NFT
             </button>
           </Box>
