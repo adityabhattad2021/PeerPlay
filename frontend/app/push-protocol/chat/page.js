@@ -93,13 +93,13 @@ export default function Chat() {
     { text: "I am fine, thank you!", side: "right" },
   ]);
 
-  async function handlePush(signer) {
+  async function createUserIfNecessary(signer) {
     let userObj = await PushAPI.user.get({
       account: `eip155:${address}`,
       env: "staging",
     });
 
-    if (!userObj) {
+    if (!userObj?.encryptedPrivateKey) {
       userObj = await PushAPI.user.create({
         signer: signer, // ethers.js signer
         env: "staging",
@@ -109,25 +109,73 @@ export default function Chat() {
     const pgpDecrpyptedPvtKey = await PushAPI.chat.decryptPGPKey({
       encryptedPGPPrivateKey: userObj.encryptedPrivateKey,
       signer: signer,
-    });
-
-    const response = await PushAPI.chat.chats({
-      account: `eip155:${address}`,
-      toDecrypt: true,
-      pgpPrivateKey: pgpDecrpyptedPvtKey,
       env: "staging",
     });
 
-    console.log(response);
+    return { ...userObj, privateKey: pgpDecrpyptedPvtKey };
+  }
+
+  async function getChats(
+    account,
+    pgpPrivateKey,
+    creatorAddress,
+    threadHash,
+    limit = 40,
+    env = "staging"
+  ) {
+    if (!threadHash) {
+      threadHash = await PushAPI.chat.conversationHash({
+        account: account,
+        conversationId: creatorAddress,
+        env: env,
+      });
+      threadHash = threadHash.threadHash;
+    }
+    if (threadHash) {
+      const chats = await PushAPI.chat.history({
+        account: account,
+        pgpPrivateKey: pgpPrivateKey,
+        threadhash: threadHash,
+        toDecrypt: true,
+        limit: limit,
+        env: env,
+      });
+      const lastThreadHash = chats[chats.length - 1]?.link;
+      const lastListPresent = chats.length > 0 ? true : false;
+      return { chatsResponse: chats, lastThreadHash, lastListPresent };
+    }
+    return { chatsResponse: [], lastThreadHash: null, lastListPresent: false };
+  }
+
+  async function decryptChat(messages, connectedUser, env = "staging") {
+    const decryptedChat = await PushAPI.chat.decryptConversation({
+      messages: [messages],
+      connectedUser,
+      pgpPrivateKey: connectedUser.privateKey,
+      env,
+    });
+    return decryptedChat[0];
+  }
+
+  async function walletToPCAIP10(account) {
+    if (account.includes("eip155:")) {
+      return account;
+    }
+    return "eip155:" + account;
+  }
+
+  async function pCAIP10ToWallet(wallet) {
+    wallet = wallet.replace("eip155:", "");
+    return wallet;
   }
 
   async function handlePushSendMessage(message) {
-    try{
+    try {
       console.log("Trying to send message");
       const { ethereum } = window;
-      if(ethereum){
+      if (ethereum) {
         const provider = new ethers.providers.Web3Provider(ethereum);
-				const signer = provider.getSigner();
+        const signer = provider.getSigner();
         let userObj = await PushAPI.user.get({
           account: `eip155:${address}`,
           env: "staging",
@@ -145,10 +193,9 @@ export default function Chat() {
         });
         console.log(response);
       }
-    }catch(error){
+    } catch (error) {
       console.log(error);
     }
-    
   }
 
   useEffect(() => {
@@ -160,7 +207,6 @@ export default function Chat() {
     }
   }, []);
 
-  
   return (
     <Box
       p={2}
