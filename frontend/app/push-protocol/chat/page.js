@@ -122,32 +122,33 @@ export default function Chat() {
   }
 
   async function handlePushSendMessage(message) {
-    const provider = new ethers.providers.Web3Provider(ethereum);
-    
-    if (provider) {
-      const signer = provider.getSigner();
-      let userObj = await PushAPI.user.get({
-        account: `eip155:${address}`,
-        env: "staging",
-      });
-
-      const pgpDecrpyptedPvtKey = await PushAPI.chat.decryptPGPKey({
-        encryptedPGPPrivateKey: userObj.encryptedPrivateKey,
-        signer: signer,
-      });
-
-      const response = await PushAPI.chat.send({
-        messageContent: message,
-        messageType: "Text",
-        receiverAddress: `eip155:${creatorAddress}`,
-        signer: signer,
-        pgpPrivateKey: pgpDecrpyptedPvtKey,
-      });
-
-      console.log(response);
-      setMessages([...messages, { text: message, side: "right" }]);
-      dummy.current.scrollIntoView({ behavior: "smooth", mt: "-10px" });
+    try{
+      console.log("Trying to send message");
+      const { ethereum } = window;
+      if(ethereum){
+        const provider = new ethers.providers.Web3Provider(ethereum);
+				const signer = provider.getSigner();
+        let userObj = await PushAPI.user.get({
+          account: `eip155:${address}`,
+          env: "staging",
+        });
+        const pgpDecrpyptedPvtKey = await PushAPI.chat.decryptPGPKey({
+          encryptedPGPPrivateKey: userObj.encryptedPrivateKey,
+          signer: signer,
+        });
+        const response = await PushAPI.chat.send({
+          messageContent: message,
+          messageType: "Text",
+          receiverAddress: `eip155:${creatorAddress}`,
+          signer: signer,
+          pgpPrivateKey: pgpDecrpyptedPvtKey,
+        });
+        console.log(response);
+      }
+    }catch(error){
+      console.log(error);
     }
+    
   }
 
   useEffect(() => {
@@ -158,6 +159,8 @@ export default function Chat() {
       handlePush(signer);
     }
   }, []);
+
+  
   return (
     <Box
       p={2}
