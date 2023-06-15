@@ -129,6 +129,24 @@ export function StateContextProvider({ children }) {
     }
   }
 
+  async function getUserMintedVideos(){
+    if (typeof window.ethereum !== "undefined") {
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      const contract = new ethers.Contract(
+        peerplayAddress,
+        peerplayABI,
+        signer
+      );
+      try {
+        const res = await contract.getUserMintedVideos();
+        return res;
+      } catch (error) {
+        console.log("Error", error);
+      }
+    }
+  }
+
   async function uploadVideo(
     videoTitle,
     videoDescription,
@@ -242,7 +260,8 @@ export function StateContextProvider({ children }) {
         mintVideoNFT,
         checkIfUserHasMintedVideo,
         uploadVideo,
-        supportCreator
+        supportCreator,
+        getUserMintedVideos
       }}
     >
       {children}
