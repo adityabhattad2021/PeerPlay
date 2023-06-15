@@ -1,24 +1,28 @@
 "use client";
 import CustomButton from "@/components/CustomButton";
-import {
-  Box,
-  List,
-  ListItem,
-  ListItemText,
-  TextField,
-  Button,
-} from "@mui/material";
-import { useState, useRef } from "react";
+import { Box, TextField } from "@mui/material";
+import { useState, useRef, useEffect } from "react";
+import * as PushAPI from "@pushprotocol/restapi";
+import { ethers } from "ethers";
+import { useAccount } from "wagmi";
+import { useSearchParams } from "next/navigation";
 
 function MessageLeft({ text }) {
   return (
-    <Box sx={{ width: "100%", display: "flex", justifyContent: "flex-start",my:"10px" }}>
+    <Box
+      sx={{
+        width: "100%",
+        display: "flex",
+        justifyContent: "flex-start",
+        my: "10px",
+      }}
+    >
       <Box
         sx={{
           backgroundColor: "#289935",
-          px:"15px",
+          px: "15px",
           borderRadius: "20px",
-          color:"white",
+          color: "white",
         }}
       >
         <h4>{text}</h4>
@@ -34,14 +38,14 @@ function MessageRight({ text }) {
         width: "100%",
         display: "flex",
         justifyContent: "flex-end",
-        my:"10px"
+        my: "10px",
       }}
     >
       <Box
         sx={{
           backgroundColor: "#289935",
-          px:"15px",
-          color:"white",
+          px: "15px",
+          color: "white",
           borderRadius: "20px",
         }}
       >
@@ -67,7 +71,7 @@ function SendMessage({ onSend }) {
         variant="filled"
         sx={{
           width: "95%",
-          height:"95%",
+          height: "95%",
           mr: "15px",
           backgroundColor: "whitesmoke",
           borderRadius: "10px",
@@ -79,16 +83,81 @@ function SendMessage({ onSend }) {
 }
 
 export default function Chat() {
+  const searchParams = useSearchParams();
+
+  const creatorAddress = searchParams.get("creatorAddress");
+  const { address } = useAccount();
   const dummy = useRef();
   const [messages, setMessages] = useState([
     { text: "Hello, how are you?", side: "left" },
     { text: "I am fine, thank you!", side: "right" },
   ]);
 
-  const handleSendMessage = (message) => {
-    setMessages([...messages, { text: message, side: "right" }]);
-    dummy.current.scrollIntoView({ behavior: "smooth",mt:"-10px" });
-  };
+  async function handlePush(signer) {
+    let userObj = await PushAPI.user.get({
+      account: `eip155:${address}`,
+      env: "staging",
+    });
+
+    if (!userObj) {
+      userObj = await PushAPI.user.create({
+        signer: signer, // ethers.js signer
+        env: "staging",
+      });
+    }
+
+    const pgpDecrpyptedPvtKey = await PushAPI.chat.decryptPGPKey({
+      encryptedPGPPrivateKey: userObj.encryptedPrivateKey,
+      signer: signer,
+    });
+
+    const response = await PushAPI.chat.chats({
+      account: `eip155:${address}`,
+      toDecrypt: true,
+      pgpPrivateKey: pgpDecrpyptedPvtKey,
+      env: "staging",
+    });
+
+    console.log(response);
+  }
+
+  async function handlePushSendMessage(message) {
+    const provider = new ethers.providers.Web3Provider(ethereum);
+    
+    if (provider) {
+      const signer = provider.getSigner();
+      let userObj = await PushAPI.user.get({
+        account: `eip155:${address}`,
+        env: "staging",
+      });
+
+      const pgpDecrpyptedPvtKey = await PushAPI.chat.decryptPGPKey({
+        encryptedPGPPrivateKey: userObj.encryptedPrivateKey,
+        signer: signer,
+      });
+
+      const response = await PushAPI.chat.send({
+        messageContent: message,
+        messageType: "Text",
+        receiverAddress: `eip155:${creatorAddress}`,
+        signer: signer,
+        pgpPrivateKey: pgpDecrpyptedPvtKey,
+      });
+
+      console.log(response);
+      setMessages([...messages, { text: message, side: "right" }]);
+      dummy.current.scrollIntoView({ behavior: "smooth", mt: "-10px" });
+    }
+  }
+
+  useEffect(() => {
+    const provider = new ethers.providers.Web3Provider(ethereum);
+    if (provider) {
+      const signer = provider.getSigner();
+      console.log("working");
+      handlePush(signer);
+    }
+  }, []);
   return (
     <Box
       p={2}
@@ -103,7 +172,6 @@ export default function Chat() {
         flexDirection: "column",
         alignItems: "flex-start",
         justifyContent: "center",
-        // backgroundColor: "white",
       }}
     >
       <Box
@@ -135,7 +203,7 @@ export default function Chat() {
           zIndex: 10,
         }}
       >
-        <SendMessage onSend={handleSendMessage} />
+        <SendMessage onSend={handlePushSendMessage} />
       </Box>
     </Box>
   );
