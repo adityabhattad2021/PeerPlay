@@ -45,7 +45,7 @@ const livepeerTheme = {
 
 // Wagmi Config
 const { chains, publicClient } = configureChains(
-  [mainnet, polygonMumbai],
+  [polygonMumbai,mainnet],
   [
     jsonRpcProvider({
       rpc: (chain) => {

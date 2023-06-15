@@ -114,10 +114,15 @@ a {
   font-size: small;
   padding: 20px 15px;
   height: 50px;
-  width: 40%;
+  width: 180px;
   padding: 7px 15px;
   border-radius: 10px;
   color: #fff;
+}
+
+ul, li {
+  text-align: left;
+  list-style: none;
 }
 
 .push-btn {

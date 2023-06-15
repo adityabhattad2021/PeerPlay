@@ -10,15 +10,15 @@ import {
   useContractWrite,
   usePrepareContractWrite,
 } from "wagmi";
-import ChatBubbleIcon from "@mui/icons-material/ChatBubble";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CustomButton from "@/components/CustomButton";
 import { peerplayABI, peerplayAddress } from "@/constants";
 import { useDebounce } from "usehooks-ts";
 import { useStateContext } from "@/context";
+import Link from "next/link";
 
 export default function CreatorDetail({ params }) {
-  const { address,isConnected } = useAccount();
+  const { address, isConnected } = useAccount();
   const [imageURL, setImageURL] = useState();
   const [isSupporter, setIsSupporter] = useState(true);
   const { checkIfSupporterFunc, fetchImageWithRateLimitHandling } =
@@ -55,6 +55,8 @@ export default function CreatorDetail({ params }) {
   });
 
   const debouncedPrice = useDebounce(creatorSupportPrice, 10000);
+
+  console.log(debouncedPrice, isSupporter);
 
   const { config } = usePrepareContractWrite({
     address: peerplayAddress,
@@ -99,7 +101,7 @@ export default function CreatorDetail({ params }) {
   useState(() => {
     checkIfSupporterFunc(params?.address)
       .then((isSupporter) => {
-        setIsSupporter(isSupporter)
+        setIsSupporter(isSupporter);
       })
       .catch((error) => {
         console.log(error);
@@ -184,24 +186,44 @@ export default function CreatorDetail({ params }) {
               />
             ) : (
               <div
-                  style={{
-                    display:"flex",
-                    justifyContent:"space-around",
-                    width:"50%"
-                  }} 
+                style={{
+                  display: "flex",
+                  justifyContent: "space-around",
+                  width: "50%",
+                }}
               >
-                <CustomButton
-                  // onClick={write}
-                  text="Chat With Creator"
-                  disabled={!write}
-                  className="creator-page-btn"
-                />
-                <CustomButton
-                  // onClick={write}
-                  text="Video Call"
-                  disabled={!write}
-                  className="creator-page-btn"
-                />
+                <Link
+                  href={{
+                    pathname: "/push-protocol/chat",
+                    query: {
+                      userAddress: address,
+                      creatorAddress: params?.address,
+                    },
+                  }}
+                >
+                  <CustomButton
+                    // onClick={write}
+                    text="Chat With Creator"
+                    disabled={!write}
+                    className="creator-page-btn"
+                  />
+                </Link>
+                <Link
+                  href={{
+                    pathname: "/push-protocol/video",
+                    query: {
+                      userAddress: address,
+                      creatorAddress: params?.address,
+                    },
+                  }}
+                >
+                  <CustomButton
+                    // onClick={write}
+                    text="Video Call"
+                    disabled={!write}
+                    className="creator-page-btn"
+                  />
+                </Link>
               </div>
             )}
           </Box>

@@ -9,19 +9,13 @@ import {
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import {
   useAccount,
-  useContractWrite,
   useEnsName,
-  usePrepareContractWrite,
 } from "wagmi";
-import { getFilesFromPath } from "web3.storage";
-// import { create } from "ipfs-http-client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { connect } from "@wagmi/core";
 import { InjectedConnector } from "@wagmi/core/connectors/injected";
 import { useStateContext } from "@/context";
-import { peerplayABI, peerplayAddress } from "@/constants";
 import { toast } from "react-hot-toast";
 
 const style = {
