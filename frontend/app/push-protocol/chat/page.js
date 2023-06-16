@@ -81,6 +81,7 @@ function SendMessage({ onSend }) {
           mr: "15px",
           backgroundColor: "whitesmoke",
           borderRadius: "10px",
+          p:"5px"
         }}
       />
       <CustomButton text="Sent" onClick={() => handleSubmit()} />
@@ -98,30 +99,24 @@ export default function Chat() {
   const dummy = useRef();
   const [chats, setChats] = useState();
   const [connectedUser, setConnectedUser] = useState();
+  const [signer,setSigner] = useState();
 
   async function handlePushSendMessage(message) {
     try {
-      console.log("Trying to send message");
-      const { ethereum } = window;
-      if (ethereum) {
-        const provider = new ethers.providers.Web3Provider(ethereum);
-        const signer = provider.getSigner();
-        let userObj = await PushAPI.user.get({
-          account: `eip155:${address}`,
-          env: "staging",
-        });
-        const pgpDecrpyptedPvtKey = await PushAPI.chat.decryptPGPKey({
-          encryptedPGPPrivateKey: userObj.encryptedPrivateKey,
-          signer: signer,
-        });
-        const response = await PushAPI.chat.send({
+      console.log("sending message" ,message.trim(),connectedUser,signer);
+      if (message.trim() !== '' && connectedUser && signer) {
+        console.log("sending message inside");
+        const pCAIP10recieverAccount = walletToPCAIP10(creatorAddress);
+        const sendResponse = await PushAPI.chat.send({
           messageContent: message,
-          messageType: "Text",
-          receiverAddress: `eip155:${creatorAddress}`,
-          signer: signer,
-          pgpPrivateKey: pgpDecrpyptedPvtKey,
+          messageType: 'Text',
+          receiverAddress: pCAIP10recieverAccount,
+          pgpPrivateKey: connectedUser?.privateKey,
+          signer:signer,
+          env,
         });
-        console.log(response);
+        console.log(sendResponse);
+        getChatCall()
       }
     } catch (error) {
       console.log(error);
@@ -133,27 +128,36 @@ export default function Chat() {
     const provider = new ethers.providers.Web3Provider(ethereum);
     if (!provider) return;
     const signer = provider.getSigner();
+    setSigner(signer)
     const pCAIP10account = walletToPCAIP10(address);
-    const cUser = await createUserIfNecessary({
-      account: pCAIP10account,
-      signer,
-    });
-    setConnectedUser(cUser);
+    try{
+      const cUser = await createUserIfNecessary({
+        account: pCAIP10account,
+        signer,
+      });
+      setConnectedUser(cUser);
+    }catch(error){
+      console.log(error);
+    }
   }
 
   async function getChatCall() {
     if (!isConnected) return;
     if (!connectedUser) return;
     const pCAIP10account = walletToPCAIP10(address);
-    const { chatsResponse, lastThreadHash, lastListPresent } = await getChats({
-      account: pCAIP10account,
-      pgpPrivateKey: connectedUser.privateKey,
-      creatorAddress,
-      env,
-    });
-    const reversed = chatsResponse.reverse();
-    setChats([...reversed]);
-    dummy.current.scrollIntoView({ behavior: "smooth" });
+    try{
+      const { chatsResponse, lastThreadHash, lastListPresent } = await getChats({
+        account: pCAIP10account,
+        pgpPrivateKey: connectedUser.privateKey,
+        creatorAddress,
+        env,
+      });
+      const reversed = chatsResponse.reverse();
+      setChats([...reversed]);
+      dummy.current.scrollIntoView({ behavior: "smooth" });
+    }catch(error){
+      console.log(error);
+    }
   }
 
   useEffect(() => {
