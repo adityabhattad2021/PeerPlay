@@ -1,24 +1,34 @@
 "use client";
 import CustomButton from "@/components/CustomButton";
+import { Box, TextField } from "@mui/material";
+import { useState, useRef, useEffect } from "react";
+import * as PushAPI from "@pushprotocol/restapi";
+import { ethers } from "ethers";
+import { useAccount, useNetwork } from "wagmi";
+import { useSearchParams } from "next/navigation";
 import {
-  Box,
-  List,
-  ListItem,
-  ListItemText,
-  TextField,
-  Button,
-} from "@mui/material";
-import { useState, useRef } from "react";
+  createUserIfNecessary,
+  getChats,
+} from "@/push-helpers/push-chat/helpers/chat";
+import { walletToCAIP, walletToPCAIP10 } from "@/push-helpers/push-chat/helpers/address";
+import { useSDKSocket } from "@/push-helpers/push-chat/hooks/useSDKSocket";
 
 function MessageLeft({ text }) {
   return (
-    <Box sx={{ width: "100%", display: "flex", justifyContent: "flex-start",my:"10px" }}>
+    <Box
+      sx={{
+        width: "100%",
+        display: "flex",
+        justifyContent: "flex-start",
+        my: "10px",
+      }}
+    >
       <Box
         sx={{
           backgroundColor: "#289935",
-          px:"15px",
+          px: "15px",
           borderRadius: "20px",
-          color:"white",
+          color: "white",
         }}
       >
         <h4>{text}</h4>
@@ -34,14 +44,14 @@ function MessageRight({ text }) {
         width: "100%",
         display: "flex",
         justifyContent: "flex-end",
-        my:"10px"
+        my: "10px",
       }}
     >
       <Box
         sx={{
           backgroundColor: "#289935",
-          px:"15px",
-          color:"white",
+          px: "15px",
+          color: "white",
           borderRadius: "20px",
         }}
       >
@@ -67,10 +77,11 @@ function SendMessage({ onSend }) {
         variant="filled"
         sx={{
           width: "95%",
-          height:"95%",
+          height: "95%",
           mr: "15px",
           backgroundColor: "whitesmoke",
           borderRadius: "10px",
+          p:"5px"
         }}
       />
       <CustomButton text="Sent" onClick={() => handleSubmit()} />
@@ -78,22 +89,100 @@ function SendMessage({ onSend }) {
   );
 }
 
-export default function Chat() {
-  const dummy = useRef();
-  const [messages, setMessages] = useState([
-    { text: "Hello, how are you?", side: "left" },
-    { text: "I am fine, thank you!", side: "right" },
-  ]);
+const env = "staging";
 
-  const handleSendMessage = (message) => {
-    setMessages([...messages, { text: message, side: "right" }]);
-    dummy.current.scrollIntoView({ behavior: "smooth",mt:"-10px" });
-  };
+export default function Chat() {
+  const searchParams = useSearchParams();
+
+  const creatorAddress = searchParams.get("creatorAddress");
+  const { address, isConnected } = useAccount();
+  const { chain } = useNetwork();
+  const dummy = useRef();
+  const [chats, setChats] = useState();
+  const [connectedUser, setConnectedUser] = useState();
+  const [signer,setSigner] = useState();
+  const CAIPaccount = walletToCAIP(address,chain.id);
+  const socketData = useSDKSocket({
+    account:CAIPaccount
+  })
+
+  async function handlePushSendMessage(message) {
+    try {
+      if (message.trim() !== '' && connectedUser && signer) {
+        console.log("sending message inside");
+        const pCAIP10recieverAccount = walletToPCAIP10(creatorAddress);
+        const sendResponse = await PushAPI.chat.send({
+          messageContent: message,
+          messageType: 'Text',
+          receiverAddress: pCAIP10recieverAccount,
+          pgpPrivateKey: connectedUser?.privateKey,
+          signer:signer,
+          env,
+        });
+        console.log(sendResponse);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async function getConnectedUserCall() {
+    if (!isConnected) return;
+    const provider = new ethers.providers.Web3Provider(ethereum);
+    if (!provider) return;
+    const signer = provider.getSigner();
+    setSigner(signer)
+    const pCAIP10account = walletToPCAIP10(address);
+    try{
+      const cUser = await createUserIfNecessary({
+        account: pCAIP10account,
+        signer,
+      });
+      setConnectedUser(cUser);
+    }catch(error){
+      console.log(error);
+    }
+  }
+
+  async function getChatCall() {
+    if (!isConnected) return;
+    if (!connectedUser) return;
+    const pCAIP10account = walletToPCAIP10(address);
+    try{
+      const { chatsResponse, lastThreadHash, lastListPresent } = await getChats({
+        account: pCAIP10account,
+        pgpPrivateKey: connectedUser.privateKey,
+        creatorAddress,
+        env,
+      });
+      const reversed = chatsResponse.reverse();
+      setChats([...reversed]);
+      dummy.current.scrollIntoView({ behavior: "smooth" });
+    }catch(error){
+      console.log(error);
+    }
+  }
+
+  useEffect(() => {
+    getConnectedUserCall();
+  }, []);
+
+  useEffect(() => {
+    getChatCall();
+  }, [connectedUser]);
+
+  useEffect(() => {
+    if(socketData.messagesSinceLastConnection && !socketData.messagesSinceLastConnection.decrypted){
+      getChatCall();
+    }
+  }, [socketData.messagesSinceLastConnection,getChatCall]);
+
+
   return (
     <Box
       p={2}
       sx={{
-        width: "100%",
+        width: "95%",
         height: { sx: "calc(100vh - 80px)", md: "calc(83vh)" },
         marginLeft: { sx: 0, md: "14%" },
         marginTop: { sx: "80px", md: 0 },
@@ -103,39 +192,44 @@ export default function Chat() {
         flexDirection: "column",
         alignItems: "flex-start",
         justifyContent: "center",
-        // backgroundColor: "white",
+        position: "relative",
       }}
     >
       <Box
         sx={{
-          width: "98%",
-          height: "90vh",
+          width: "95%",
+          height: "90%",
           overflow: "auto",
           display: "flex",
           flexDirection: "column",
-          alignItems: "flex-end",
-          m: "10px",
+          alignItems: "flex-start",
+          justifyContent: "center",
+          position: "absolute",
+          top: 0,
         }}
       >
-        {messages.map((message, index) =>
-          message.side === "left" ? (
-            <MessageLeft key={index} text={message.text} />
-          ) : (
-            <MessageRight key={index} text={message.text} />
-          )
-        )}
+        {chats &&
+          chats.map((message, index) =>
+            message.fromCAIP10 !== walletToPCAIP10(address) ? (
+              <MessageLeft key={index} text={message.messageContent} />
+            ) : (
+              <MessageRight key={index} text={message.messageContent} />
+            )
+          )}
         <span ref={dummy}></span>
       </Box>
       <Box
         sx={{
           display: "flex",
-          height: "10%",
+          height: "8%",
           m: "10px",
-          width: "98%",
+          width: "95%",
           zIndex: 10,
+          position: "absolute",
+          bottom: 0,
         }}
       >
-        <SendMessage onSend={handleSendMessage} />
+        <SendMessage onSend={handlePushSendMessage} />
       </Box>
     </Box>
   );

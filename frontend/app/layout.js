@@ -24,6 +24,7 @@ import { StateContextProvider } from "@/context";
 import Feed from "@/components/Feed";
 import { Toaster } from "react-hot-toast";
 
+
 // Livepeer Config
 const livepeerClient = createReactClient({
   provider: studioProvider({
@@ -45,7 +46,7 @@ const livepeerTheme = {
 
 // Wagmi Config
 const { chains, publicClient } = configureChains(
-  [polygonMumbai,mainnet],
+  [polygonMumbai, mainnet],
   [
     jsonRpcProvider({
       rpc: (chain) => {
@@ -108,21 +109,21 @@ export default function RootLayout({ children }) {
               overlayBlur: "small",
             })}
           >
-            <LivepeerConfig client={livepeerClient} theme={livepeerTheme}>
-              <ThemeProvider theme={theme}>
-                <StateContextProvider>
-                  {mounted && (
-                    <Box sx={{ backgroundColor: "#000", height: "100%" }}>
-                      <div>
-                        <Toaster />
-                      </div>
-                      <Navbar />
-                      <Feed>{children}</Feed>
-                    </Box>
-                  )}
-                </StateContextProvider>
-              </ThemeProvider>
-            </LivepeerConfig>
+              <LivepeerConfig client={livepeerClient} theme={livepeerTheme}>
+                <ThemeProvider theme={theme}>
+                  <StateContextProvider>
+                    {mounted && (
+                      <Box sx={{ backgroundColor: "#000", height: "100%" }}>
+                        <div>
+                          <Toaster />
+                        </div>
+                        <Navbar />
+                        <Feed>{children}</Feed>
+                      </Box>
+                    )}
+                  </StateContextProvider>
+                </ThemeProvider>
+              </LivepeerConfig>
           </RainbowKitProvider>
         </WagmiConfig>
       </body>
