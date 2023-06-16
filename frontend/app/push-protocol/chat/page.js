@@ -6,6 +6,12 @@ import * as PushAPI from "@pushprotocol/restapi";
 import { ethers } from "ethers";
 import { useAccount } from "wagmi";
 import { useSearchParams } from "next/navigation";
+import {
+  createUserIfNecessary,
+  getChats,
+} from "@/push-helpers/push-chat/helpers/chat";
+import { walletToPCAIP10 } from "@/push-helpers/push-chat/helpers/address";
+import Loader from "@/components/Loader";
 
 function MessageLeft({ text }) {
   return (
@@ -82,92 +88,15 @@ function SendMessage({ onSend }) {
   );
 }
 
+const env = "staging";
+
 export default function Chat() {
   const searchParams = useSearchParams();
 
   const creatorAddress = searchParams.get("creatorAddress");
-  const { address } = useAccount();
+  const { address, isConnected } = useAccount();
   const dummy = useRef();
-  const [messages, setMessages] = useState([
-    { text: "Hello, how are you?", side: "left" },
-    { text: "I am fine, thank you!", side: "right" },
-  ]);
-
-  async function createUserIfNecessary(signer) {
-    let userObj = await PushAPI.user.get({
-      account: `eip155:${address}`,
-      env: "staging",
-    });
-
-    if (!userObj?.encryptedPrivateKey) {
-      userObj = await PushAPI.user.create({
-        signer: signer, // ethers.js signer
-        env: "staging",
-      });
-    }
-
-    const pgpDecrpyptedPvtKey = await PushAPI.chat.decryptPGPKey({
-      encryptedPGPPrivateKey: userObj.encryptedPrivateKey,
-      signer: signer,
-      env: "staging",
-    });
-
-    return { ...userObj, privateKey: pgpDecrpyptedPvtKey };
-  }
-
-  async function getChats(
-    account,
-    pgpPrivateKey,
-    creatorAddress,
-    threadHash,
-    limit = 40,
-    env = "staging"
-  ) {
-    if (!threadHash) {
-      threadHash = await PushAPI.chat.conversationHash({
-        account: account,
-        conversationId: creatorAddress,
-        env: env,
-      });
-      threadHash = threadHash.threadHash;
-    }
-    if (threadHash) {
-      const chats = await PushAPI.chat.history({
-        account: account,
-        pgpPrivateKey: pgpPrivateKey,
-        threadhash: threadHash,
-        toDecrypt: true,
-        limit: limit,
-        env: env,
-      });
-      const lastThreadHash = chats[chats.length - 1]?.link;
-      const lastListPresent = chats.length > 0 ? true : false;
-      return { chatsResponse: chats, lastThreadHash, lastListPresent };
-    }
-    return { chatsResponse: [], lastThreadHash: null, lastListPresent: false };
-  }
-
-  async function decryptChat(messages, connectedUser, env = "staging") {
-    const decryptedChat = await PushAPI.chat.decryptConversation({
-      messages: [messages],
-      connectedUser,
-      pgpPrivateKey: connectedUser.privateKey,
-      env,
-    });
-    return decryptedChat[0];
-  }
-
-  async function walletToPCAIP10(account) {
-    if (account.includes("eip155:")) {
-      return account;
-    }
-    return "eip155:" + account;
-  }
-
-  async function pCAIP10ToWallet(wallet) {
-    wallet = wallet.replace("eip155:", "");
-    return wallet;
-  }
+  const [chats, setChats] = useState();
 
   async function handlePushSendMessage(message) {
     try {
@@ -198,20 +127,33 @@ export default function Chat() {
     }
   }
 
-  useEffect(() => {
+  const getChatCall = async () => {
+    if (!isConnected) return;
     const provider = new ethers.providers.Web3Provider(ethereum);
-    if (provider) {
-      const signer = provider.getSigner();
-      console.log("working");
-      handlePush(signer);
-    }
+    if (!provider) return;
+    const signer = provider.getSigner();
+    const account = `eip155:${address}`;
+    const connectedUser = await createUserIfNecessary({ account, signer });
+    const { chatsResponse, lastThreadHash, lastListPresent } = await getChats({
+      account,
+      pgpPrivateKey: connectedUser.privateKey,
+      creatorAddress,
+      env,
+    });
+    const reversed = chatsResponse.reverse();
+    setChats([...reversed]);
+    dummy.current.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    getChatCall();
   }, []);
 
   return (
     <Box
       p={2}
       sx={{
-        width: "100%",
+        width: "95%",
         height: { sx: "calc(100vh - 80px)", md: "calc(83vh)" },
         marginLeft: { sx: 0, md: "14%" },
         marginTop: { sx: "80px", md: 0 },
@@ -221,35 +163,41 @@ export default function Chat() {
         flexDirection: "column",
         alignItems: "flex-start",
         justifyContent: "center",
+        position: "relative",
       }}
     >
       <Box
         sx={{
-          width: "98%",
-          height: "90vh",
+          width: "95%",
+          height: "90%",
           overflow: "auto",
           display: "flex",
           flexDirection: "column",
-          alignItems: "flex-end",
-          m: "10px",
+          alignItems: "flex-start",
+          justifyContent: "center",
+          position: "absolute",
+          top:0
         }}
       >
-        {messages.map((message, index) =>
-          message.side === "left" ? (
-            <MessageLeft key={index} text={message.text} />
-          ) : (
-            <MessageRight key={index} text={message.text} />
-          )
-        )}
-        <span ref={dummy}></span>
+        {chats &&
+          chats.map((message, index) =>
+            message.fromCAIP10 !== walletToPCAIP10(address) ? (
+              <MessageLeft key={index} text={message.messageContent} />
+            ) : (
+              <MessageRight key={index} text={message.messageContent} />
+            )
+          )}
+          <span ref={dummy}></span>
       </Box>
       <Box
         sx={{
           display: "flex",
-          height: "10%",
+          height: "8%",
           m: "10px",
-          width: "98%",
+          width: "95%",
           zIndex: 10,
+          position: "absolute",
+          bottom: 0,
         }}
       >
         <SendMessage onSend={handlePushSendMessage} />

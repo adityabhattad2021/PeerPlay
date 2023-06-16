@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 
-export default function VideoPlayer({ stream, isMuted }) {
+export default function VideoPlayer({ stream, isMuted,className }) {
   const videoRef = useRef(null);
 
   useEffect(() => {
@@ -12,11 +12,7 @@ export default function VideoPlayer({ stream, isMuted }) {
 
   return (
     <video
-      style={{
-        width: "25vw",
-        height: "fit-content",
-        border: "2px solid black",
-      }}
+      className={className}
       ref={videoRef}
       muted={isMuted}
       autoPlay

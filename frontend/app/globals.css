@@ -120,7 +120,8 @@ a {
   color: #fff;
 }
 
-ul, li {
+ul,
+li {
   text-align: left;
   list-style: none;
 }
@@ -131,6 +132,45 @@ ul, li {
   outline: none;
   border: none;
   cursor: pointer;
+}
+
+.video-btn {
+  font-weight: bold !important;
+  text-transform: capitalize;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background: #289935;
+  outline: none;
+  border: none;
+  font-size: small;
+  padding: 20px 20px;
+  padding: 20px 20px;
+  border-radius: 50%;
+  color: #fff;
+}
+
+.video-btn:disabled {
+  cursor: not-allowed;
+}
+
+.incoming-video-plyr {
+  width: 49vw;
+  height: 57vh;
+  object-fit: contain;
+  border: 2px solid black;
+  background-color: white;
+  border-radius: 15px;
+}
+
+.outgoing-video-plyr {
+  width: 20vw;
+  height: 28vh;
+  object-fit: contain;
+  border: 2px solid black;
+  background-color: white;
+  border-radius: 15px;
 }
 
 .link-btn {
@@ -183,6 +223,13 @@ ul, li {
   align-items: center;
   justify-content: center;
   position: relative;
+}
+
+.chats-holder {
+  height: 90%;
+  width: 95%;
+  display: flex;
+  flex-direction: column;
 }
 
 .dropzone-video {

@@ -7,7 +7,6 @@ import { ENV } from "@pushprotocol/restapi/src/lib/constants";
 import { getCAIPAddress } from "../helper/getCAIPAddress";
 
 
-
 export const usePushSocket = ({ env }) => {
   const { address } = useAccount();
   const { chain } = useNetwork();
