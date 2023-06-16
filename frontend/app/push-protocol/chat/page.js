@@ -4,14 +4,14 @@ import { Box, TextField } from "@mui/material";
 import { useState, useRef, useEffect } from "react";
 import * as PushAPI from "@pushprotocol/restapi";
 import { ethers } from "ethers";
-import { useAccount } from "wagmi";
+import { useAccount, useNetwork } from "wagmi";
 import { useSearchParams } from "next/navigation";
 import {
   createUserIfNecessary,
   getChats,
 } from "@/push-helpers/push-chat/helpers/chat";
-import { walletToPCAIP10 } from "@/push-helpers/push-chat/helpers/address";
-import Loader from "@/components/Loader";
+import { walletToCAIP, walletToPCAIP10 } from "@/push-helpers/push-chat/helpers/address";
+import { useSDKSocket } from "@/push-helpers/push-chat/hooks/useSDKSocket";
 
 function MessageLeft({ text }) {
   return (
@@ -96,14 +96,18 @@ export default function Chat() {
 
   const creatorAddress = searchParams.get("creatorAddress");
   const { address, isConnected } = useAccount();
+  const { chain } = useNetwork();
   const dummy = useRef();
   const [chats, setChats] = useState();
   const [connectedUser, setConnectedUser] = useState();
   const [signer,setSigner] = useState();
+  const CAIPaccount = walletToCAIP(address,chain.id);
+  const socketData = useSDKSocket({
+    account:CAIPaccount
+  })
 
   async function handlePushSendMessage(message) {
     try {
-      console.log("sending message" ,message.trim(),connectedUser,signer);
       if (message.trim() !== '' && connectedUser && signer) {
         console.log("sending message inside");
         const pCAIP10recieverAccount = walletToPCAIP10(creatorAddress);
@@ -116,7 +120,6 @@ export default function Chat() {
           env,
         });
         console.log(sendResponse);
-        getChatCall()
       }
     } catch (error) {
       console.log(error);
@@ -167,6 +170,13 @@ export default function Chat() {
   useEffect(() => {
     getChatCall();
   }, [connectedUser]);
+
+  useEffect(() => {
+    if(socketData.messagesSinceLastConnection && !socketData.messagesSinceLastConnection.decrypted){
+      getChatCall();
+    }
+  }, [socketData.messagesSinceLastConnection,getChatCall]);
+
 
   return (
     <Box

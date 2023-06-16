@@ -19,7 +19,7 @@ export default function Navbar() {
       EmbedSDK.init({
         headerText: "Notifications", // optional
         targetID: "sdk-trigger-id", // mandatory
-        appName: "Livepeer", // mandatory
+        appName: "Peerplay", // mandatory
         user: account, // mandatory
         chainId: 80001, // mandatory
         viewOptions: {
