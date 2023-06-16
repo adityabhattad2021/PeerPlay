@@ -97,6 +97,7 @@ export default function Chat() {
   const { address, isConnected } = useAccount();
   const dummy = useRef();
   const [chats, setChats] = useState();
+  const [connectedUser, setConnectedUser] = useState();
 
   async function handlePushSendMessage(message) {
     try {
@@ -127,27 +128,41 @@ export default function Chat() {
     }
   }
 
-  const getChatCall = async () => {
+  async function getConnectedUserCall() {
     if (!isConnected) return;
     const provider = new ethers.providers.Web3Provider(ethereum);
     if (!provider) return;
     const signer = provider.getSigner();
-    const account = `eip155:${address}`;
-    const connectedUser = await createUserIfNecessary({ account, signer });
+    const pCAIP10account = walletToPCAIP10(address);
+    const cUser = await createUserIfNecessary({
+      account: pCAIP10account,
+      signer,
+    });
+    setConnectedUser(cUser);
+  }
+
+  async function getChatCall() {
+    if (!isConnected) return;
+    if (!connectedUser) return;
+    const pCAIP10account = walletToPCAIP10(address);
     const { chatsResponse, lastThreadHash, lastListPresent } = await getChats({
-      account,
+      account: pCAIP10account,
       pgpPrivateKey: connectedUser.privateKey,
       creatorAddress,
       env,
     });
     const reversed = chatsResponse.reverse();
     setChats([...reversed]);
-    dummy.current.scrollIntoView({ behavior: 'smooth' });
-  };
+    dummy.current.scrollIntoView({ behavior: "smooth" });
+  }
+
+  useEffect(() => {
+    getConnectedUserCall();
+  }, []);
 
   useEffect(() => {
     getChatCall();
-  }, []);
+  }, [connectedUser]);
 
   return (
     <Box
@@ -176,7 +191,7 @@ export default function Chat() {
           alignItems: "flex-start",
           justifyContent: "center",
           position: "absolute",
-          top:0
+          top: 0,
         }}
       >
         {chats &&
@@ -187,7 +202,7 @@ export default function Chat() {
               <MessageRight key={index} text={message.messageContent} />
             )
           )}
-          <span ref={dummy}></span>
+        <span ref={dummy}></span>
       </Box>
       <Box
         sx={{
