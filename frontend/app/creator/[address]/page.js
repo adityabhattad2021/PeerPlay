@@ -196,7 +196,6 @@ export default function CreatorDetail({ params }) {
                   href={{
                     pathname: "/push-protocol/chat",
                     query: {
-                      userAddress: address,
                       creatorAddress: params?.address,
                     },
                   }}
@@ -212,7 +211,6 @@ export default function CreatorDetail({ params }) {
                   href={{
                     pathname: "/push-protocol/video",
                     query: {
-                      userAddress: address,
                       creatorAddress: params?.address,
                     },
                   }}

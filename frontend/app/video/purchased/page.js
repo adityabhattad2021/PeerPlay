@@ -5,23 +5,35 @@ import { useStateContext } from "@/context";
 import isZeroAddress from "@/utils/isZeroAddress";
 import { Box, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
-import { useAccount, useContractRead, useWalletClient } from "wagmi";
+import {
+  useAccount,
+} from "wagmi";
+import { connect } from "@wagmi/core";
+import { InjectedConnector } from "@wagmi/core/connectors/injected";
 
 export default function MyMintedNFTs() {
-  const { isConnected, connect } = useAccount();
+  const { isConnected } = useAccount();
   const { getUserMintedVideos } = useStateContext();
   const [formattedData, setFormattedData] = useState();
 
+  async function connectWallet() {
+    await connect({
+      connector: new InjectedConnector(),
+    });
+  }
+
   useEffect(() => {
     if (!isConnected) {
-      connect();
+      connectWallet();
       getUserMintedVideos()
         .then((data) => {
-          console.log(data[0].creator);
-          setFormattedData(data);
-          if (isZeroAddress(data[0].creator)) {
-            setFormattedData([]);
+          let newData = [];
+          for (let x = 0; x < data.length; x++) {
+            if (!isZeroAddress(data[x].creator)) {
+              newData.push(data[x]);
+            }
           }
+          setFormattedData(newData);
         })
         .catch((error) => {
           console.log(error);
@@ -29,19 +41,19 @@ export default function MyMintedNFTs() {
     } else {
       getUserMintedVideos()
         .then((data) => {
-          console.log(data[0].creator);
-          setFormattedData(data);
-          if (isZeroAddress(data[0].creator)) {
-            setFormattedData([]);
+          let newData = [];
+          for (let x = 0; x < data.length; x++) {
+            if (!isZeroAddress(data[x].creator)) {
+              newData.push(data[x]);
+            }
           }
+          setFormattedData(newData);
         })
         .catch((error) => {
           console.log(error);
         });
     }
   }, []);
-
-  console.log(formattedData);
 
   return (
     <Box
@@ -56,7 +68,7 @@ export default function MyMintedNFTs() {
       }}
     >
       <Typography variant="h4" fontWeight="bold" mb={2} sx={{ color: "white" }}>
-        Your <span style={{ color: "#289935" }}>minted</span> Videos
+        Your <span style={{ color: "#289935" }}>minted</span> videos
       </Typography>
       <Videos videos={formattedData} isLoading={false} direction={"row"} />
     </Box>

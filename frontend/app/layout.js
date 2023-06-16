@@ -14,7 +14,7 @@ import {
   darkTheme,
 } from "@rainbow-me/rainbowkit";
 import { configureChains, createConfig, WagmiConfig } from "wagmi";
-import { mainnet, polygonMumbai, polygon } from "wagmi/chains";
+import { mainnet, polygonMumbai } from "wagmi/chains";
 import { jsonRpcProvider } from "wagmi/providers/jsonRpc";
 import { publicProvider } from "wagmi/providers/public";
 import { useState, useEffect } from "react";
@@ -95,6 +95,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <title>Peerplay</title>
+      <link rel="icon" href="/icon.png" sizes="any" />
       <body className={inter.className}>
         <WagmiConfig config={wagmiConfig}>
           <RainbowKitProvider
