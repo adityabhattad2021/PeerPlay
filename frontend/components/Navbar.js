@@ -58,7 +58,7 @@ export default function Navbar() {
       }}
     >
       <Link href={"/"}>
-        <div style={{ width: "100px", height: "40px" }}>
+        {/* <div style={{ width: "100px", height: "40px" }}>
           <h1
             style={{
               color: "#fff",
@@ -71,7 +71,8 @@ export default function Navbar() {
           >
             PeerPlay
           </h1>
-        </div>
+        </div> */}
+        <Image src={logo} alt="logo" width={150} height={40} />
       </Link>
       <Stack
         direction={notSmallScreen ? "row" : "column"}

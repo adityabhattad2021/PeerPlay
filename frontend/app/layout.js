@@ -73,6 +73,7 @@ const theme = createTheme({
 
 const { connectors } = getDefaultWallets({
   appName: "PeerPlay",
+  projectId:process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID,
   chains,
 });
 
