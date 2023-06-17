@@ -10,8 +10,10 @@ import {
   createUserIfNecessary,
   getChats,
 } from "@/push-helpers/push-chat/helpers/chat";
-import { walletToCAIP, walletToPCAIP10 } from "@/push-helpers/push-chat/helpers/address";
-import { useSDKSocket } from "@/push-helpers/push-chat/hooks/useSDKSocket";
+import { walletToPCAIP10 } from "@/push-helpers/push-chat/helpers/address";
+import { usePushSocketForChat } from "@/push-helpers/push-chat/hooks/useSDKSocket";
+import { usePushSocket } from "@/push-helpers/push-video/hooks/usePushSocket";
+
 
 function MessageLeft({ text }) {
   return (
@@ -101,10 +103,9 @@ export default function Chat() {
   const [chats, setChats] = useState();
   const [connectedUser, setConnectedUser] = useState();
   const [signer,setSigner] = useState();
-  const CAIPaccount = walletToCAIP(address,chain.id);
-  const socketData = useSDKSocket({
-    account:CAIPaccount
-  })
+  const { pushSocket, isPushSocketConnected, latestFeedItem } = usePushSocket({
+    env,
+  });
 
   async function handlePushSendMessage(message) {
     try {
@@ -120,6 +121,7 @@ export default function Chat() {
           env,
         });
         console.log(sendResponse);
+        getChatCall()
       }
     } catch (error) {
       console.log(error);
@@ -172,10 +174,15 @@ export default function Chat() {
   }, [connectedUser]);
 
   useEffect(() => {
-    if(socketData.messagesSinceLastConnection && !socketData.messagesSinceLastConnection.decrypted){
-      getChatCall();
+    if (!pushSocket?.connected) {
+      pushSocket?.connect();
     }
-  }, [socketData.messagesSinceLastConnection,getChatCall]);
+  }, [pushSocket]);
+
+  useEffect(() => {
+    if (!isPushSocketConnected || !latestFeedItem) return;
+    getChatCall()
+  }, [latestFeedItem]);
 
 
   return (

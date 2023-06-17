@@ -1,85 +1,82 @@
 import { useEffect, useState } from "react";
-import { createSocketConnection, EVENTS } from "@pushprotocol/socket";
 
-export const useSDKSocket = ({ account }) => {
-  const env = "staging";
-  const socketType = "chat";
-  const [epnsSDKSocket, setEpnsSDKSocket] = useState(null);
-  const [messagesSinceLastConnection, setMessagesSinceLastConnection] =
-    useState("");
-  const [isSDKSocketConnected, setIsSDKSocketConnected] = useState(
-    epnsSDKSocket?.connected
+import { useAccount } from "wagmi";
+import { useNetwork } from "wagmi";
+import { createSocketConnection, EVENTS } from "@pushprotocol/socket";
+import { getCAIPAddress } from "@/push-helpers/push-video/helper/getCAIPAddress";
+
+
+
+export const usePushSocketForChat = ({ env }) => {
+  const { address } = useAccount();
+  const { chain } = useNetwork();
+
+  const [pushSocket, setPushSocket] = useState(null);
+  const [latestFeedItem, setLatestFeedItem] = useState(null);
+  const [isPushSocketConnected, setIsPushSocketConnected] = useState(
+    pushSocket?.connected
   );
 
   const addSocketEvents = () => {
-    console.warn("\n--> addSocketEvents",epnsSDKSocket);
-    epnsSDKSocket?.on(EVENTS.CONNECT, () => {
+    pushSocket?.on(EVENTS.CONNECT, () => {
       console.log("CONNECTED: ");
-      setIsSDKSocketConnected(true);
+      setIsPushSocketConnected(true);
     });
 
-    epnsSDKSocket?.on(EVENTS.DISCONNECT, (err) => {
-      console.log("DISCONNECTED: ", err);
-      setIsSDKSocketConnected(false);
+    pushSocket?.on(EVENTS.DISCONNECT, () => {
+      console.log("DISCONNECTED: ");
+      setIsPushSocketConnected(false);
+      setLatestFeedItem([]);
     });
-    console.log("\t-->will attach eachMessage event now");
-    epnsSDKSocket?.on(EVENTS.USER_FEEDS, (chat) => {
 
-      console.log("\n\n\n\neachMessage event: ", chat);
-
-      // do stuff with data
-      setMessagesSinceLastConnection((chat) => {
-        return { ...chat, decrypted: false };
-      });
+    pushSocket?.on(EVENTS.CHAT_RECEIVED_MESSAGE, (feedItem) => {
+      console.log("RECEIVED FEED ITEM: ", feedItem);
+      setLatestFeedItem(feedItem);
     });
   };
 
   const removeSocketEvents = () => {
-    console.warn("\n--> removeSocketEvents");
-    epnsSDKSocket?.off(EVENTS.CONNECT);
-    epnsSDKSocket?.off(EVENTS.DISCONNECT);
+    pushSocket?.off(EVENTS.CONNECT);
+    pushSocket?.off(EVENTS.DISCONNECT);
+    pushSocket?.off(EVENTS.CHAT_RECEIVED_MESSAGE);
   };
 
   useEffect(() => {
-    if (epnsSDKSocket) {
+    if (pushSocket) {
       addSocketEvents();
     }
 
     return () => {
-      if (epnsSDKSocket) {
+      if (pushSocket) {
         removeSocketEvents();
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [epnsSDKSocket]);
+  }, [pushSocket]);
 
+  /**
+   * Whenever the requisite params to create a connection object change
+   *  - disconnect the old connection
+   *  - create a new connection object
+   */
   useEffect(() => {
-    console.log("Inside use Effect",account,env);
-    if (account) {
-      if (epnsSDKSocket) {
-        // console.log('=================>>> disconnection in the hook');
-        epnsSDKSocket?.disconnect();
+    if (address) {
+      if (pushSocket) {
+        pushSocket?.disconnect();
       }
-      const main = async () => {
-        const connectionObject = createSocketConnection({
-          user: account,
-          env,
-          socketType,
-          socketOptions: { autoConnect: false, reconnectionAttempts: 3 },
-        });
-        console.warn("new connection object: ", connectionObject);
 
-        setEpnsSDKSocket(connectionObject);
-      };
-      main().catch((err) => console.error(err));
+      const connectionObject = createSocketConnection({
+        user: getCAIPAddress(env, address, "User"),
+        env,
+        socketOptions: { autoConnect: false },
+      });
+      setPushSocket(connectionObject);
     }
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [account, env]);
+  }, [address, env, chain?.id]);
 
   return {
-    epnsSDKSocket,
-    isSDKSocketConnected,
-    messagesSinceLastConnection,
+    pushSocket,
+    isPushSocketConnected,
+    latestFeedItem,
   };
 };

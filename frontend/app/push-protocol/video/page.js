@@ -137,7 +137,6 @@ export default function Video() {
           chatId: data.meta.chatId,
         });
       }
-      console.log("Incoming call");
     })();
   }, [data.incoming, data.local.address, data.local.stream, data.meta.chatId]);
 
@@ -162,6 +161,8 @@ export default function Video() {
     const additionalMeta = payload["data"]["additionalMeta"];
     console.log("RECEIVED ADDITIONAL META", additionalMeta);
     if (!additionalMeta) return;
+
+    console.log(additionalMeta.type);
 
     // check for PUSH_VIDEO
     if (additionalMeta.type !== `${ADDITIONAL_META_TYPE.PUSH_VIDEO}+1`) return;
