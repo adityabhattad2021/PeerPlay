@@ -7,11 +7,13 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 import { useRouter,usePathname } from "next/navigation";
 import { useAccount, useDisconnect } from "wagmi";
 import CustomButton from "./CustomButton";
+import InventoryIcon from '@mui/icons-material/Inventory';
 
 const pages = [
   { name: "New", icon: <HomeIcon /> ,path:"/"},
   { name: "Upload", icon: <UploadIcon /> ,path:'/video/upload'},
-  { name: "Minted Videos", icon: <StreamIcon />,path:'/video/purchased' },
+  {name:'Stream',icon: <StreamIcon />,path:'/video/stream'},
+  { name: "Minted Videos", icon: <InventoryIcon />,path:'/video/purchased' },
 ];
 
 export default function Sidebar({ selectedPage, setSelectedPage }) {

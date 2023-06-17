@@ -35,6 +35,8 @@ export default function CreatorDetail({ params }) {
     chainId: 1,
   });
 
+  console.log(ensName,ensAvatar);
+
   const { data: creatorVideos, isLoading: isCreatorVideosLoading } =
     useContractRead({
       address: peerplayAddress,
