@@ -158,6 +158,7 @@ contract PeerPlay is Ownable{
             msg.value >= supportPrice,
             "Amount must be greater than or equal to support price"
         );
+        creatorRevenueShare[creator] += msg.value;
         creators[creator].supporters += 1;
         creators[creator].supportersList.push(msg.sender);
         isSupporter[msg.sender][creator] = true;
