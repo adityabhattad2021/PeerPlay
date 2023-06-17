@@ -1,8 +1,13 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import SearchIcon from "@mui/icons-material/Search";
 import { Paper, IconButton } from "@mui/material";
+import { useStateContext } from "@/context";
 
 export default function SearchBar() {
+  const { keyword, setKeyword } =
+    useStateContext();
+
+
   return (
     <Paper
       component="form"
@@ -14,9 +19,13 @@ export default function SearchBar() {
         mr: { sm: 5 },
       }}
     >
-      <input className="search-bar" placeholder="Search..." />
+      <input
+        value={keyword}
+        onChange={(e) => setKeyword(e.target.value)}
+        className="search-bar"
+        placeholder="Search..."
+      />
       <IconButton
-        type="submit"
         sx={{ p: "10px", color: "red" }}
         aria-label="search"
         color="primary"

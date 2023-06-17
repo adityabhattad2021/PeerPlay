@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useContext, createContext } from "react";
+import { useContext, createContext, useState } from "react";
 import { Web3Storage } from "web3.storage";
 import { ethers } from "ethers";
 import { peerplayABI, peerplayAddress } from "@/constants";
@@ -7,6 +7,10 @@ import { peerplayABI, peerplayAddress } from "@/constants";
 const StateContext = createContext();
 
 export function StateContextProvider({ children }) {
+
+  const [searchedVideos,setSearchedVideos]=useState([]);
+  const [keyword, setKeyword] = useState('');
+
   async function uploadToIpfsPromise(file) {
     return new Promise(async (resolve, reject) => {
       try {
@@ -303,6 +307,10 @@ export function StateContextProvider({ children }) {
         getUserMintedVideos,
         withdrawCreatorRevenueFunc,
         withdrawSupporterRevenueFunc,
+        searchedVideos,
+        setSearchedVideos,
+        keyword,
+        setKeyword
       }}
     >
       {children}

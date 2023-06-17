@@ -1,10 +1,10 @@
 "use client";
 import Videos from "@/components/Videos";
-import { Box, Stack, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { useContractRead } from "wagmi";
 import { peerplayAddress, peerplayABI } from "@/constants";
-import { ethers } from "ethers";
-import axios from "axios";
+import { useStateContext } from "@/context";
+import { useEffect } from "react";
 
 export default function Home() {
   const { data, isLoading } = useContractRead({
@@ -13,6 +13,19 @@ export default function Home() {
     functionName: "getAllVideos",
     chainId: 80001,
   });
+  const { searchedVideos, setSearchedVideos, keyword } = useStateContext();
+
+  useEffect(() => {
+    if(keyword===''){
+      setSearchedVideos(data)
+    }else {
+      if(!data) return;
+      const results = data.filter((item) =>
+        item.title.toLowerCase().includes(keyword.toLowerCase())
+      );
+      setSearchedVideos(results);
+    }
+  }, [keyword]);
 
 
   return (
@@ -30,7 +43,11 @@ export default function Home() {
       <Typography variant="h4" fontWeight="bold" mb={2} sx={{ color: "white" }}>
         All <span style={{ color: "#289935" }}>videos</span>
       </Typography>
-      <Videos videos={data} isLoading={isLoading} direction={"row"} />
+      <Videos
+        videos={searchedVideos || data}
+        isLoading={isLoading}
+        direction={"row"}
+      />
     </Box>
   );
 }
