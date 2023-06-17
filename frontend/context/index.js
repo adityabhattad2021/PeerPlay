@@ -249,6 +249,45 @@ export function StateContextProvider({ children }) {
     }
   }
 
+  async function withdrawCreatorRevenueFunc(){
+    if (typeof window.ethereum !== "undefined") {
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      const contract = new ethers.Contract(
+        peerplayAddress,
+        peerplayABI,
+        signer
+      );
+      try {
+        const res = await contract.withdrawCreatorRevenue();
+        await res.wait()
+        console.log(res);
+        return res;
+      } catch (error) {
+        console.log("Error", error);
+      }
+    }
+  }
+  async function withdrawSupporterRevenueFunc(){
+    if (typeof window.ethereum !== "undefined") {
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      const contract = new ethers.Contract(
+        peerplayAddress,
+        peerplayABI,
+        signer
+      );
+      try {
+        const res = await contract.withdrawSupporterRevenue();
+        await res.wait()
+        console.log(res);
+        return res;
+      } catch (error) {
+        console.log("Error", error);
+      }
+    }
+  }
+
   return (
     <StateContext.Provider
       value={{
@@ -261,7 +300,9 @@ export function StateContextProvider({ children }) {
         checkIfUserHasMintedVideo,
         uploadVideo,
         supportCreator,
-        getUserMintedVideos
+        getUserMintedVideos,
+        withdrawCreatorRevenueFunc,
+        withdrawSupporterRevenueFunc,
       }}
     >
       {children}
