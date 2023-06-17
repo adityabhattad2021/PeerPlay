@@ -81,7 +81,7 @@ export default function Stream() {
         <Box
           sx={{
             height: "80%",
-            width:"20%",
+            width: "20%",
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
@@ -94,7 +94,11 @@ export default function Stream() {
             variant="filled"
             value={streamName}
             onChange={(e) => setStreamName(e.target.value)}
-            sx={{ backgroundColor: "whitesmoke", borderRadius: "10px",width:"100%" }}
+            sx={{
+              backgroundColor: "whitesmoke",
+              borderRadius: "10px",
+              width: "100%",
+            }}
           />
           <CustomButton
             className="stream-btn"
@@ -106,15 +110,35 @@ export default function Stream() {
           />
 
           {createdStream && (
-            <Typography
-              variant="p"
-              fontWeight="bold"
-              mb={2}
-              sx={{ color: "white" }}
-            >
-              <span style={{ color: "#289935" }}>stream id</span>:{" "}
-              {createdStream?.id}
-            </Typography>
+            <>
+              <Typography
+                variant="p"
+                fontWeight="bold"
+                mb={2}
+                sx={{ color: "white" }}
+              >
+                Ingest <span style={{ color: "#289935" }}> url</span>:{" "}
+                {createdStream?.rtmpIngestUrl}
+              </Typography>
+              <Typography
+                variant="p"
+                fontWeight="bold"
+                mb={2}
+                sx={{ color: "white" }}
+              >
+                <span style={{ color: "#289935" }}>stream key</span>:{" "}
+                {createdStream?.streamKey}
+              </Typography>
+              <Typography
+                variant="p"
+                fontWeight="bold"
+                mb={2}
+                sx={{ color: "white" }}
+              >
+                Playback <span style={{ color: "#289935" }}>url</span>:{" "}
+                {createdStream?.playbackUrl}
+              </Typography>
+            </>
           )}
         </Box>
       </Box>
