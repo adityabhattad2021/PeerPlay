@@ -14,7 +14,7 @@ import {
   darkTheme,
 } from "@rainbow-me/rainbowkit";
 import { configureChains, createConfig, WagmiConfig } from "wagmi";
-import { mainnet, polygonMumbai } from "wagmi/chains";
+import { mainnet, polygonMumbai,sepolia } from "wagmi/chains";
 import { jsonRpcProvider } from "wagmi/providers/jsonRpc";
 import { publicProvider } from "wagmi/providers/public";
 import { useState, useEffect } from "react";
@@ -46,13 +46,14 @@ const livepeerTheme = {
 
 // Wagmi Config
 const { chains, publicClient } = configureChains(
-  [polygonMumbai, mainnet],
+  [polygonMumbai, mainnet,sepolia],
   [
     jsonRpcProvider({
       rpc: (chain) => {
         const rpcLookup = {
           [polygonMumbai.id]: process.env.NEXT_PUBLIC_POLYGON_RPC_URL,
           [mainnet.id]: process.env.NEXT_PUBLIC_MAINNET_RPC_URL,
+          [sepolia.id]:process.env.NEXT_PUBLIC_SEPOLIA_RPC_URL
         };
         return {
           http: rpcLookup[chain.id],
