@@ -7,9 +7,8 @@ import { peerplayABI, peerplayAddress } from "@/constants";
 const StateContext = createContext();
 
 export function StateContextProvider({ children }) {
-
-  const [searchedVideos,setSearchedVideos]=useState([]);
-  const [keyword, setKeyword] = useState('');
+  const [searchedVideos, setSearchedVideos] = useState([]);
+  const [keyword, setKeyword] = useState("");
 
   async function uploadToIpfsPromise(file) {
     return new Promise(async (resolve, reject) => {
@@ -106,7 +105,7 @@ export function StateContextProvider({ children }) {
       );
       try {
         const res = await contract.checkIfAccessToVideo(videoId);
-        console.log("res is ",res);
+        console.log("res is ", res);
         return res;
       } catch (error) {
         console.log("Error", error);
@@ -133,7 +132,7 @@ export function StateContextProvider({ children }) {
     }
   }
 
-  async function getUserMintedVideos(){
+  async function getUserMintedVideos() {
     if (typeof window.ethereum !== "undefined") {
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const signer = provider.getSigner();
@@ -168,12 +167,22 @@ export function StateContextProvider({ children }) {
         signer
       );
       try {
-        const res = await contract.uploadVideo(
+        const gasEstimate = await contract.estimateGas.uploadVideo(
           videoTitle,
           videoDescription,
           videoAssetId,
           videoCid,
           videoPrice
+        );
+        const res = await contract.uploadVideo(
+          videoTitle,
+          videoDescription,
+          videoAssetId,
+          videoCid,
+          videoPrice,
+          {
+            gasLimit: gasEstimate,
+          }
         );
         return res;
       } catch (error) {
@@ -194,9 +203,12 @@ export function StateContextProvider({ children }) {
         signer
       );
       try {
-        const gasEstimate = await contract.estimateGas.mintAccessNFTForVideo(videoId, {
-          value: ethers.utils.parseEther(formattedPrice),
-        });
+        const gasEstimate = await contract.estimateGas.mintAccessNFTForVideo(
+          videoId,
+          {
+            value: ethers.utils.parseEther(formattedPrice),
+          }
+        );
         const res = await contract.mintAccessNFTForVideo(videoId, {
           value: ethers.utils.parseEther(formattedPrice),
           gasLimit: gasEstimate,
@@ -208,9 +220,8 @@ export function StateContextProvider({ children }) {
       }
     }
   }
-  
 
-  async function supportCreator(creatorAddress,supportPrice) {
+  async function supportCreator(creatorAddress, supportPrice) {
     const formattedPrice = ethers.utils.formatEther(supportPrice.toString());
     console.log(formattedPrice);
     if (typeof window.ethereum !== "undefined") {
@@ -227,7 +238,7 @@ export function StateContextProvider({ children }) {
           value: ethers.utils.parseEther(formattedPrice).toString(),
           gasLimit: gasLimit,
         });
-        await res.wait()
+        await res.wait();
         console.log(res);
         return res;
       } catch (error) {
@@ -253,7 +264,7 @@ export function StateContextProvider({ children }) {
     }
   }
 
-  async function withdrawCreatorRevenueFunc(){
+  async function withdrawCreatorRevenueFunc() {
     if (typeof window.ethereum !== "undefined") {
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const signer = provider.getSigner();
@@ -264,7 +275,7 @@ export function StateContextProvider({ children }) {
       );
       try {
         const res = await contract.withdrawCreatorRevenue();
-        await res.wait()
+        await res.wait();
         console.log(res);
         return res;
       } catch (error) {
@@ -272,7 +283,7 @@ export function StateContextProvider({ children }) {
       }
     }
   }
-  async function withdrawSupporterRevenueFunc(){
+  async function withdrawSupporterRevenueFunc() {
     if (typeof window.ethereum !== "undefined") {
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const signer = provider.getSigner();
@@ -283,7 +294,7 @@ export function StateContextProvider({ children }) {
       );
       try {
         const res = await contract.withdrawSupporterRevenue();
-        await res.wait()
+        await res.wait();
         console.log(res);
         return res;
       } catch (error) {
@@ -310,7 +321,7 @@ export function StateContextProvider({ children }) {
         searchedVideos,
         setSearchedVideos,
         keyword,
-        setKeyword
+        setKeyword,
       }}
     >
       {children}

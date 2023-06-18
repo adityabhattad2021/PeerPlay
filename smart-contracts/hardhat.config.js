@@ -4,7 +4,7 @@ require("@nomicfoundation/hardhat-toolbox");
 require("dotenv").config();
 
 module.exports = {
-  defaultNetwork:"sepolia",
+  defaultNetwork:"mumbai",
   solidity: "0.8.18",
   networks:{
     mumbai:{
