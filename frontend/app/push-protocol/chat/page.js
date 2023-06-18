@@ -79,7 +79,7 @@ function SendMessage({ onSend }) {
         variant="filled"
         sx={{
           width: "95%",
-          height: "95%",
+          height: "85%",
           mr: "15px",
           backgroundColor: "whitesmoke",
           borderRadius: "10px",
